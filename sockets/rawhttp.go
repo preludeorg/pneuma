@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -30,7 +29,6 @@ func (contact HTTP) Communicate(address string, sleep int, beacon Beacon) {
 			var tempB Beacon
 			json.Unmarshal(body, &tempB)
 			if(len(tempB.Links)) == 0 {
-				fmt.Println("Nothing to do.")
 				break
 			}
 			for _, link := range tempB.Links {
