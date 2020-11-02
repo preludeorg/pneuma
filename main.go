@@ -40,7 +40,7 @@ func buildBeacon(name string, group string) sockets.Beacon {
 }
 
 func main() {
-	name := flag.String("name", pickName(6), "Give this agent a name")
+	name := flag.String("name", pickName(12), "Give this agent a name")
 	contact := flag.String("contact", "tcp", "Which contact to use")
 	address := flag.String("address", "0.0.0.0:2323", "The ip:port of the socket listening post")
 	group := flag.String("range", "red", "Which range to associate to")
