@@ -33,7 +33,7 @@ GOOS represents the target platform. It can be either darwin, linux or windows.
 This will output a file (into the payloads directory) for each supported operating system, which you can copy to any target system and execute normally
 to start the agent. 
 
-> Before you compile, consider changing the SALT variable inside cryptic.go. This value represents
+> Before you compile, consider changing the encryptionKey variable inside cryptic.go. This value represents
 > the encryption key to encrypt/decrypt communications with Prelude Operator. This key must be 32-characters
 > and must match the encryption key in the Prelude Operator Settings -> local settings section. Also consider
 > changing the default address parameters in main.go, so you can start your agent without command-line arguments.
