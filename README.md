@@ -2,7 +2,7 @@
 
 Pneuma is a cross-compiled Prelude agent which can communicate over all available Operator listening post protocols, currently TCP, UDP and HTTP.
 
-> This repo is for those who feel comfortable working with the inner workings of a Remote Access Trojan (RAT). If you simply need a copy of the Pneuma agent, there are pre-compiled versions available for [MacOS](https://s3.amazonaws.com/operator.payloads/pneuma-darwin), [Windows](https://s3.amazonaws.com/operator.payloads/pneuma-windows) and [Linux](https://s3.amazonaws.com/operator.payloads/pneuma-linux). You will likely need to make these executable after download.
+> This repo is for those who feel comfortable working with the inner workings of a Remote Access Trojan (RAT). If you simply need a copy of the Pneuma agent, there are precompiled versions available for [MacOS](https://s3.amazonaws.com/operator.payloads/pneuma-darwin), [Windows](https://s3.amazonaws.com/operator.payloads/pneuma-windows) and [Linux](https://s3.amazonaws.com/operator.payloads/pneuma-linux). You will need to mark these as executable after downloading.
 
 This agent can be used with Operator, as designed, or pointed at any command-and-control (C2) listening post that can accept its beacon. More details on this below.
 
@@ -11,6 +11,9 @@ This agent can be used with Operator, as designed, or pointed at any command-and
 Clone this repository. Then ensure GoLang 1.13+ is installed before continuing.
 
 To use the agent, install GoLang then start the agent against whichever protocol you want:
+
+> If using a precompiled version, replace 'go run main.go' with './pneuma.exe' in the below commands, replacing pneuma.exe with the name of your downloaded file.
+
 ```
 go run main.go -contact tcp -address 127.0.0.1:2323
 go run main.go -contact udp -address 127.0.0.1:4545
