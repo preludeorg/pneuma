@@ -20,7 +20,7 @@ go run main.go -contact udp -address 127.0.0.1:4545
 go run main.go -contact http -address http://127.0.0.1:3391
 ```
 
-Change the address field to the location of the Prelude Operator, if you are running your agent on a different computer.
+Change the address field to the location of Prelude Operator, if you are running your agent on a different computer.
 
 ### Note on UDP
 
@@ -46,7 +46,7 @@ to start the agent.
 
 ## Use without Operator
 
-While Pneuma is designed to work with the Prelude Operator, as an open-source agent you can point it against any command-and-control (C2) listening post you want. To do this, follow these instructions:
+While Pneuma is designed to work with Prelude Operator, as an open-source agent you can point it against any command-and-control (C2) listening post you want. To do this, follow these instructions:
 
 - Ensure your C2 is up & accepting traffic on the same Pneuma port you want to use
 - Start Pneuma, pointing it at your C2
