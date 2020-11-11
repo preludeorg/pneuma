@@ -1,7 +1,7 @@
 package sockets
 
 import (
-	"../util"
+	"github.com/preludeorg/pneuma/util"
 	"encoding/json"
 	"fmt"
 	"log"

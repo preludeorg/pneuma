@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"../util"
+	"github.com/preludeorg/pneuma/util"
 )
 
 //Contact defines required functions for communicating with the server
