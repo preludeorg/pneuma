@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./sockets"
-	"./util"
+	"github.com/preludeorg/pneuma/sockets"
+	"github.com/preludeorg/pneuma/util"
 	"flag"
 	"log"
 	"math/rand"

@@ -1,8 +1,8 @@
 package sockets
 
 import (
-	"../commands"
-	"../util"
+	"github.com/preludeorg/pneuma/commands"
+	"github.com/preludeorg/pneuma/util"
 	"bytes"
 	"encoding/json"
 	"errors"
