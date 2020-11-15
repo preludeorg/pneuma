@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -47,6 +48,10 @@ func main() {
 	sleep := flag.Int("sleep", 60, "Number of seconds to sleep between beacons")
 	flag.Parse()
 
+	if !strings.Contains(*address, ":") {
+		log.Println("Your address is incorrect")
+		os.Exit(1)
+	}
 	log.Printf("[%s] agent at PID %d using key %s", *contact, os.Getpid(), key)
 	sockets.CommunicationChannels[*contact].Communicate(*address, *sleep, buildBeacon(*name, *group))
 }
