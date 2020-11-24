@@ -34,7 +34,6 @@ When you are ready to use Pneuma in a real environment, you will want to compile
 ```
 ./build.sh JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA
 ```
-GOOS represents the target platform. It can be either darwin, linux or windows.
 
 This will output a file (into the payloads directory) for each supported operating system, which you can copy to any target system and execute normally
 to start the agent. 
