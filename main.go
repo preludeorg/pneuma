@@ -46,8 +46,10 @@ func main() {
 	address := flag.String("address", "0.0.0.0:2323", "The ip:port of the socket listening post")
 	group := flag.String("range", "red", "Which range to associate to")
 	sleep := flag.Int("sleep", 60, "Number of seconds to sleep between beacons")
+	useragent := flag.String("useragent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36", "User agent used when connecting")
 	flag.Parse()
 
+	sockets.UA = *useragent
 	if !strings.Contains(*address, ":") {
 		log.Println("Your address is incorrect")
 		os.Exit(1)

@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+var UA string
+
 type HTTP struct {}
 
 func init() {
@@ -82,6 +84,7 @@ func request(address string, method string, data []byte) ([]byte, http.Header, e
 	if err != nil {
 		log.Print(err)
 	}
+	req.Header.Set("User-Agent", UA)
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Print(err)
