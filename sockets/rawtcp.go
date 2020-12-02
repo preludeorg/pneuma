@@ -1,12 +1,11 @@
 package sockets
 
 import (
-	"fmt"
-	"github.com/preludeorg/pneuma/commands"
-	"github.com/preludeorg/pneuma/util"
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"github.com/preludeorg/pneuma/commands"
+	"github.com/preludeorg/pneuma/util"
 	"io"
 	"log"
 	"net"
@@ -60,7 +59,6 @@ func respond(conn net.Conn, beacon Beacon, message string){
 	}
 	pwd, _ := os.Getwd()
 	beacon.Pwd = pwd
-	fmt.Println(beacon)
 	bufferedSend(conn, beacon)
 }
 
