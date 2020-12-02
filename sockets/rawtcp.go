@@ -1,6 +1,7 @@
 package sockets
 
 import (
+	"fmt"
 	"github.com/preludeorg/pneuma/commands"
 	"github.com/preludeorg/pneuma/util"
 	"bufio"
@@ -52,14 +53,14 @@ func respond(conn net.Conn, beacon Beacon, message string){
 			requestPayload(link.Payload)
 		}
 		response, status, pid := commands.RunCommand(link.Request, link.Executor)
-		link.Response = strings.TrimSpace(response)
+		link.Response = strings.TrimSpace(response) + "\n"
 		link.Status = status
 		link.Pid = pid
 		beacon.Links = append(beacon.Links, link)
 	}
 	pwd, _ := os.Getwd()
 	beacon.Pwd = pwd
-
+	fmt.Println(beacon)
 	bufferedSend(conn, beacon)
 }
 
