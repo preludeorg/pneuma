@@ -49,6 +49,17 @@ While Pneuma is designed to work with Prelude Operator, as an open-source agent 
 
 - Ensure your C2 is up & accepting traffic on the same Pneuma port you want to use
 - Start Pneuma, pointing it at your C2
+- The C2 server will send instructions in this format which get encrypted with your KEY inside Key Management in Settings:
+```
+{
+  ID: "067e99fb-f88f-49a8-aadc-b5cadf3438d4",
+  ttp: "0b726950-11fc-4b15-a7d3-0d6e9cfdbeab",
+  tactic: "discovery",
+  Executor: "sh",
+  Request: "whoami",
+  Payload: "https://s3.amazonaws.com/operator.payloads/demo.exe",
+}
+```
 - Your C2 will receive an encrypted string, using the KEY inside cryptic.go. Your C2 should use the same encryption key to decrypt the string, which will resolve in a JSON-object, which will contain the below structure:
 ```
 {
