@@ -10,7 +10,7 @@ import (
 )
 
 //RunCommand executes a given command
-func RunCommand(message string, executor string) (string, int, int) {
+func RunCommand(message string, executor string, payloadPath string) (string, int, int) {
 	if strings.HasPrefix(message, "cd") {
 		pieces := strings.Split(message, "cd")
 		bites := changeDirectory(pieces[1])
@@ -57,4 +57,13 @@ func changeDirectory(target string) []byte {
 func execution(command *exec.Cmd) ([]byte, int, error){
 	bites, err := command.Output()
 	return bites, command.Process.Pid, err
+}
+
+func contains(slice []string, s string) bool {
+	for _, v := range slice {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }

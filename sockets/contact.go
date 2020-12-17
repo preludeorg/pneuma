@@ -38,7 +38,7 @@ type Instruction struct {
 	Pid int
 }
 
-func requestPayload(target string) {
+func requestPayload(target string) string {
 	var body []byte
 	var filename string
 
@@ -46,6 +46,7 @@ func requestPayload(target string) {
 	workingDir := "./"
 	path := filepath.Join(workingDir, filename)
 	util.SaveFile(bytes.NewReader(body), path)
+	return path
 }
 
 

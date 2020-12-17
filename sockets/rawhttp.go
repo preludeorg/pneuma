@@ -34,10 +34,11 @@ func (contact HTTP) Communicate(address string, sleep int, beacon Beacon) {
 				break
 			}
 			for _, link := range tempB.Links {
+				var payloadPath string
 				if len(link.Payload) > 0 {
-					requestPayload(link.Payload)
+					payloadPath = requestPayload(link.Payload)
 				}
-				response, status, pid := commands.RunCommand(link.Request, link.Executor)
+				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath)
 				link.Response = strings.TrimSpace(response)
 				link.Status = status
 				link.Pid = pid
