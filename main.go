@@ -12,9 +12,7 @@ import (
 	"time"
 )
 
-var (
-    key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
-)
+var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
 func pickName(chars int) string {
 	rand.Seed(time.Now().UnixNano())
