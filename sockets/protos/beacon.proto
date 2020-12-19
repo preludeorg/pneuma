@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option go_package = "google.golang.org/grpc/examples/beacon/beacon";
+option java_multiple_files = true;
+option java_package = "beacon";
+option java_outer_classname = "BeaconProto";
+option objc_class_prefix = "HLW";
+
+package beacon;
+
+service Beacon {
+  rpc Handle (BeaconIncoming) returns (BeaconOutgoing) {}
+}
+
+message BeaconIncoming {
+  string Name = 1;
+  string Location = 2;
+  string Platform = 3;
+  string Range = 4;
+  string Pwd = 5;
+  ListOfStrings Executors = 6;
+  Links Links = 7;
+}
+
+message BeaconOutgoing {
+  string Name = 1;
+  string Location = 2;
+  string Platform = 3;
+  string Range = 4;
+  string Pwd = 5;
+  ListOfStrings Executors = 6;
+  Links Links = 7;
+}
+
+message ListOfStrings {
+  repeated string strings = 1;
+}
+
+message Links {
+  string ID = 1;
+  string ttp = 2;
+  string tactic = 3;
+  string Executor = 4;
+  string Request = 5;
+  string Response = 6;
+  string Payload = 7;
+}

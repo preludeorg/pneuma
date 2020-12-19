@@ -22,11 +22,14 @@ go run main.go -contact http -address http://127.0.0.1:3391
 
 Change the address field to the location of Prelude Operator, if you are running your agent on a different computer.
 
-### Note on UDP
+### Note on GRPC
 
-Because UDP is a stateless protocol, beacons will be 1-way only, meaning you cannot use this protocol for a full 
-adversary emulation exercise. It currently cannot receive instructions. This listening post is designed to be a 
-backup <i>heartbeat</i> to prove you still have access to a given computer.
+gRPC relies on protocol buffers to determine the structure of the data between client <--> server (beacons).
+This is statically compiled, so if anything changed in the beacon properties the following command will recompile
+the buffer:
+```
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative beacon.proto
+```
 
 ## Compile
 
