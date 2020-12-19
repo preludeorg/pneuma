@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "google.golang.org/grpc/examples/beacon/beacon";
+option java_multiple_files = true;
+option java_package = "beacon";
+option java_outer_classname = "BeaconProto";
+option objc_class_prefix = "HLW";
+
+package beacon;
+
+service Beacon {
+  rpc Handle (BeaconIncoming) returns (BeaconOutgoing) {}
+}
+
+message BeaconIncoming {
+  string Beacon = 1;
+}
+
+message BeaconOutgoing {
+  string Beacon = 1;
+}
