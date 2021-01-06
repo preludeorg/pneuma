@@ -18,6 +18,7 @@ To use the agent, install GoLang then start the agent against whichever protocol
 go run main.go -contact tcp -address 127.0.0.1:2323
 go run main.go -contact udp -address 127.0.0.1:4545
 go run main.go -contact http -address http://127.0.0.1:3391
+go run main.go -contact grpc -address 127.0.0.1:2513
 ```
 
 Change the address field to the location of Prelude Operator, if you are running your agent on a different computer.
