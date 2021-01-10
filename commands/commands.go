@@ -27,24 +27,19 @@ func RunCommand(message string, executor string, payloadPath string) (string, in
 func execute(command string, executor string) ([]byte, int, int) {
 	var bites []byte
 	var pid int
-	var err error
 	var status int
 	if runtime.GOOS == "windows" {
-	    if executor == "cmd" {
-			bites, pid, err = execution(exec.Command("cmd.exe", "/c", command))
-	    } else {
-			bites, pid, err = execution(exec.Command("powershell.exe", "-ExecutionPolicy", "Bypass", "-C", command))
-	    }
+		if executor == "cmd" {
+			bites, pid, status = execution(exec.Command("cmd.exe", "/c", command))
+		} else {
+			bites, pid, status = execution(exec.Command("powershell.exe", "-ExecutionPolicy", "Bypass", "-C", command))
+		}
 	} else {
 		if executor == "python" {
-			bites, pid, err = execution(exec.Command("python", "-c", command))
+			bites, pid, status = execution(exec.Command("python", "-c", command))
 		} else {
-			bites, pid, err = execution(exec.Command("sh", "-c", command))
+			bites, pid, status = execution(exec.Command("sh", "-c", command))
 		}
-    }
-    if err != nil {
-	   bites = []byte(err.Error())
-	   status = 1
 	}
 	return []byte(fmt.Sprintf("%s%s", bites, "\n")), status, pid
 }
@@ -54,9 +49,26 @@ func changeDirectory(target string) []byte {
 	return []byte(" ")
 }
 
-func execution(command *exec.Cmd) ([]byte, int, error){
-	bites, err := command.Output()
-	return bites, command.Process.Pid, err
+func execution(command *exec.Cmd) ([]byte, int, int){
+	var bites []byte
+	var status int
+	var pid int
+	if out, err := command.Output(); err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			bites = exitError.Stderr
+			pid = exitError.Pid()
+			status = exitError.ExitCode()
+		} else {
+			bites = []byte(err.Error())
+			pid = -1
+			status = command.ProcessState.ExitCode()
+		}
+	} else {
+		bites = out
+		pid = command.ProcessState.Pid()
+		status = command.ProcessState.ExitCode()
+	}
+	return bites, pid, status
 }
 
 func contains(slice []string, s string) bool {
