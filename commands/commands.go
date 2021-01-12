@@ -20,7 +20,7 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 	} else if executor == "keyword" {
 		task := splitMessage(message, '.')
 		if task[0] == "config" {
-			updateConfiguration(task[1], agent)
+			return updateConfiguration(task[1], agent)
 		}
 		return "no keyword executors have been configured in this agent", 0, 0
 	} else {
@@ -77,12 +77,14 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 	return bites, pid, status
 }
 
-func updateConfiguration(config string, agent *util.AgentConfig){
+func updateConfiguration(config string, agent *util.AgentConfig) (string, int, int) {
 	var newConfig map[string]interface{}
 	err := json.Unmarshal([]byte(config), &newConfig)
 	if err == nil {
 		agent.SetAgentConfig(newConfig)
+		return "Updated agent configuration", os.Getpid(), 0
 	}
+	return string(err.Error()), os.Getpid(), 1
 }
 
 func contains(slice []string, s string) bool {
