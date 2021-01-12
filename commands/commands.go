@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/preludeorg/pneuma/util"
 	"log"
 	"os"
 	"os/exec"
@@ -10,12 +12,16 @@ import (
 )
 
 //RunCommand executes a given command
-func RunCommand(message string, executor string, payloadPath string) (string, int, int) {
+func RunCommand(message string, executor string, payloadPath string, agent *util.AgentConfig) (string, int, int) {
 	if strings.HasPrefix(message, "cd") {
 		pieces := strings.Split(message, "cd")
 		bites := changeDirectory(pieces[1])
 		return string(bites), 0, 0
 	} else if executor == "keyword" {
+		task := splitMessage(message, '.')
+		if task[0] == "config" {
+			updateConfiguration(task[1], agent)
+		}
 		return "no keyword executors have been configured in this agent", 0, 0
 	} else {
 		log.Print("Running instruction")
@@ -71,6 +77,14 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 	return bites, pid, status
 }
 
+func updateConfiguration(config string, agent *util.AgentConfig){
+	var newConfig map[string]interface{}
+	err := json.Unmarshal([]byte(config), &newConfig)
+	if err == nil {
+		agent.SetAgentConfig(newConfig)
+	}
+}
+
 func contains(slice []string, s string) bool {
 	for _, v := range slice {
 		if v == s {
@@ -78,4 +92,15 @@ func contains(slice []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func splitMessage(message string, splitRune rune) []string {
+	quoted := false
+	values := strings.FieldsFunc(message, func(r rune) bool {
+		if r == '"' {
+			quoted = !quoted
+		}
+		return !quoted && r == splitRune
+	})
+	return values
 }

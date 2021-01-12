@@ -22,7 +22,7 @@ func init() {
 	CommunicationChannels["http"] = HTTP{}
 }
 
-func (contact HTTP) Communicate(agent util.AgentConfig, beacon Beacon) {
+func (contact HTTP) Communicate(agent *util.AgentConfig, beacon Beacon) {
 	checkValidHTTPTarget(agent.Address, true)
 	for {
 		beacon.Links = beacon.Links[:0]
@@ -38,7 +38,7 @@ func (contact HTTP) Communicate(agent util.AgentConfig, beacon Beacon) {
 				if len(link.Payload) > 0 {
 					payloadPath = requestPayload(link.Payload)
 				}
-				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath)
+				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
 				link.Response = strings.TrimSpace(response)
 				link.Status = status
 				link.Pid = pid
