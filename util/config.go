@@ -2,6 +2,7 @@ package util
 
 import (
 	"math/rand"
+	"reflect"
 	"time"
 )
 
@@ -43,6 +44,9 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 
 func applyKey(curr interface{}, ac map[string]interface{}, key string) interface{} {
 	if val, ok := ac[key]; ok {
+		if key == "Sleep" && reflect.TypeOf(ac[key]).Kind() == reflect.Float64 {
+			return int(reflect.ValueOf(val).Float())
+		}
 		return val
 	}
 	return curr

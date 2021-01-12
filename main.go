@@ -50,5 +50,5 @@ func main() {
 	}
 	util.EncryptionKey = &agent.AESKey
 	log.Printf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
-	sockets.CommunicationChannels[*contact].Communicate(agent, buildBeacon(agent.Name, agent.Range))
+	sockets.CommunicationChannels[agent.Contact].Communicate(agent, buildBeacon(agent.Name, agent.Range))
 }

@@ -22,7 +22,7 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		if task[0] == "config" {
 			return updateConfiguration(task[1], agent)
 		}
-		return "no keyword executors have been configured in this agent", 0, 0
+		return "Keyword selected not available for agent", 0, 0
 	} else {
 		log.Print("Running instruction")
 		bites, status, pid := execute(message, executor)
@@ -82,9 +82,9 @@ func updateConfiguration(config string, agent *util.AgentConfig) (string, int, i
 	err := json.Unmarshal([]byte(config), &newConfig)
 	if err == nil {
 		agent.SetAgentConfig(newConfig)
-		return "Updated agent configuration", os.Getpid(), 0
+		return "Successfully updated agent configuration.", 0, os.Getpid()
 	}
-	return string(err.Error()), os.Getpid(), 1
+	return string(err.Error()), 1, os.Getpid()
 }
 
 func contains(slice []string, s string) bool {
