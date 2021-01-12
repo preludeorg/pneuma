@@ -5,24 +5,12 @@ import (
 	"github.com/preludeorg/pneuma/sockets"
 	"github.com/preludeorg/pneuma/util"
 	"log"
-	"math/rand"
 	"os"
 	"runtime"
 	"strings"
-	"time"
 )
 
 var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
-
-func pickName(chars int) string {
-	rand.Seed(time.Now().UnixNano())
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	b := make([]byte, chars)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
-}
 
 func buildBeacon(name string, group string) sockets.Beacon {
 	pwd, _ := os.Getwd()
@@ -39,22 +27,28 @@ func buildBeacon(name string, group string) sockets.Beacon {
 }
 
 func main() {
-	config := util.BuildConfig()
-
-	name := flag.String("name", pickName(12), "Give this agent a name")
-	contact := flag.String("contact", config.Agent.Contact, "Which contact to use")
-	address := flag.String("address", config.Agent.Address, "The ip:port of the socket listening post")
-	group := flag.String("range", config.Agent.Range, "Which range to associate to")
-	sleep := flag.Int("sleep", config.Agent.Sleep, "Number of seconds to sleep between beacons")
-	useragent := flag.String("useragent", config.Agent.Useragent, "User agent used when connecting")
+	agent := util.BuildAgentConfig()
+	name := flag.String("name", agent.Name, "Give this agent a name")
+	contact := flag.String("contact", agent.Contact, "Which contact to use")
+	address := flag.String("address", agent.Address, "The ip:port of the socket listening post")
+	group := flag.String("range", agent.Range, "Which range to associate to")
+	sleep := flag.Int("sleep", agent.Sleep, "Number of seconds to sleep between beacons")
+	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting")
 	flag.Parse()
-
-	sockets.UA = *useragent
-	util.EncryptionKey = []byte(config.Agent.AESKey)
-	if !strings.Contains(*address, ":") {
+	agent.SetAgentConfig(map[string]interface{}{
+		"Name": *name,
+		"Contact": *contact,
+		"Address": *address,
+		"Range": *group,
+		"Useragent": *useragent,
+		"Sleep": *sleep,
+	})
+	sockets.UA = agent.Useragent
+	if !strings.Contains(agent.Address, ":") {
 		log.Println("Your address is incorrect")
 		os.Exit(1)
 	}
-	log.Printf("[%s] agent at PID %d using key %s", *contact, os.Getpid(), key)
-	sockets.CommunicationChannels[*contact].Communicate(*address, *sleep, buildBeacon(*name, *group))
+	util.EncryptionKey = &agent.AESKey
+	log.Printf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
+	sockets.CommunicationChannels[*contact].Communicate(*agent, buildBeacon(agent.Name, agent.Range))
 }
