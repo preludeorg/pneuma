@@ -40,7 +40,6 @@ func buildBeacon(name string, group string) sockets.Beacon {
 
 func main() {
 	config := util.BuildConfig()
-	util.ExecutionRestraints(config)
 
 	name := flag.String("name", pickName(12), "Give this agent a name")
 	contact := flag.String("contact", config.Agent.Contact, "Which contact to use")
