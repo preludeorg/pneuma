@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"github.com/preludeorg/pneuma/sockets"
 	"github.com/preludeorg/pneuma/util"
-	"flag"
 	"log"
 	"math/rand"
 	"os"
@@ -28,26 +28,29 @@ func buildBeacon(name string, group string) sockets.Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
 	return sockets.Beacon{
-		Name: name,
-		Range: group,
-		Pwd: pwd,
-		Location: executable,
-		Platform: runtime.GOOS,
+		Name:      name,
+		Range:     group,
+		Pwd:       pwd,
+		Location:  executable,
+		Platform:  runtime.GOOS,
 		Executors: util.DetermineExecutors(runtime.GOOS, runtime.GOARCH),
-		Links: make([]sockets.Instruction, 0),
+		Links:     make([]sockets.Instruction, 0),
 	}
 }
 
 func main() {
+	config := util.BuildConfig()
+
 	name := flag.String("name", pickName(12), "Give this agent a name")
-	contact := flag.String("contact", "tcp", "Which contact to use")
-	address := flag.String("address", "0.0.0.0:2323", "The ip:port of the socket listening post")
-	group := flag.String("range", "red", "Which range to associate to")
-	sleep := flag.Int("sleep", 60, "Number of seconds to sleep between beacons")
-	useragent := flag.String("useragent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36", "User agent used when connecting")
+	contact := flag.String("contact", config.Agent.Contact, "Which contact to use")
+	address := flag.String("address", config.Agent.Address, "The ip:port of the socket listening post")
+	group := flag.String("range", config.Agent.Range, "Which range to associate to")
+	sleep := flag.Int("sleep", config.Agent.Sleep, "Number of seconds to sleep between beacons")
+	useragent := flag.String("useragent", config.Agent.Useragent, "User agent used when connecting")
 	flag.Parse()
 
 	sockets.UA = *useragent
+	util.EncryptionKey = []byte(config.Agent.AESKey)
 	if !strings.Contains(*address, ":") {
 		log.Println("Your address is incorrect")
 		os.Exit(1)

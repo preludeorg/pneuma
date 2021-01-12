@@ -13,7 +13,7 @@ import (
 	_ "fmt"
 )
 
-var encryptionKey = []byte("abcdefghijklmnopqrstuvwxyz012345")
+var EncryptionKey []byte
 
 //Encrypt the results
 func Encrypt(bites []byte) []byte {
@@ -22,7 +22,7 @@ func Encrypt(bites []byte) []byte {
 		log.Print(err)
 		return make([]byte, 0)
 	}
-	block, _ := aes.NewCipher(encryptionKey)
+	block, _ := aes.NewCipher(EncryptionKey)
 	cipherText := make([]byte, aes.BlockSize+len(plainText))
 	iv := cipherText[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
@@ -36,7 +36,7 @@ func Encrypt(bites []byte) []byte {
 //Decrypt a command
 func Decrypt(text string) string {
 	cipherText, _ := hex.DecodeString(text)
-	block, err := aes.NewCipher(encryptionKey)
+	block, err := aes.NewCipher(EncryptionKey)
 	if err != nil {
 		log.Print(err)
 		return ""
