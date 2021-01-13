@@ -12,7 +12,7 @@ import (
 
 //Contact defines required functions for communicating with the server
 type Contact interface {
-	Communicate(address string, sleep int, beacon Beacon)
+	Communicate(agent util.AgentConfig, beacon Beacon)
 }
 
 //CommunicationChannels contains the contact implementations

@@ -1,29 +1,59 @@
 package util
 
-type Config struct {
-	Agent struct {
-		AESKey    string
+import (
+	"math/rand"
+	"time"
+)
+
+type Configuration interface {
+	ApplyConfig(ac map[string]interface{})
+}
+
+type AgentConfig struct {
+		Name 	  string
+		AESKey    []byte
 		Range     string
 		Contact   string
 		Address   string
 		Useragent string
 		Sleep     int
-		KillDate  string
+}
+
+func BuildAgentConfig() *AgentConfig {
+	return &AgentConfig{
+		Name: pickName(12),
+		AESKey: []byte("abcdefghijklmnopqrstuvwxyz012345"),
+		Range: "red",
+		Contact: "tcp",
+		Address: "127.0.0.1:2323",
+		Useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36",
+		Sleep: 60,
 	}
 }
 
-func BuildConfig() *Config {
-	config := &Config{}
-	// Encryption
-	config.Agent.AESKey = "abcdefghijklmnopqrstuvwxyz012345"
+func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
+	c.Name = applyKey(c.Name, ac, "Name").(string)
+	c.AESKey = applyKey(c.AESKey, ac, "AESKey").([]byte)
+	c.Range = applyKey(c.Range, ac, "Range").(string)
+	c.Contact = applyKey(c.Contact, ac, "Contact").(string)
+	c.Address = applyKey(c.Address, ac, "Address").(string)
+	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
+	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
+}
 
-	// Contact
-	config.Agent.Range = "red"
-	config.Agent.Contact = "tcp"
-	config.Agent.Address = "127.0.0.1:2323"
-	config.Agent.Useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
-		"Chrome/87.0.4280.66 Safari/537.36"
-	config.Agent.Sleep = 60
+func applyKey(curr interface{}, ac map[string]interface{}, key string) interface{} {
+	if val, ok := ac[key]; ok {
+		return val
+	}
+	return curr
+}
 
-	return config
+func pickName(chars int) string {
+	rand.Seed(time.Now().UnixNano())
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	b := make([]byte, chars)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

