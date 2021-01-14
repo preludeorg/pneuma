@@ -24,6 +24,7 @@ type Beacon struct {
 	Platform string
 	Executors []string
 	Range string
+	Sleep int
 	Pwd string
 	Links []Instruction
 }
