@@ -20,6 +20,7 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 	} else if executor == "keyword" {
 		task := splitMessage(message, '.')
 		if task[0] == "config" {
+			util.ResetFlag = true
 			return updateConfiguration(task[1], agent)
 		}
 		return "Keyword selected not available for agent", 0, 0

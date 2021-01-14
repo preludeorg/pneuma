@@ -4,10 +4,16 @@ import (
 	"bytes"
 	"log"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/preludeorg/pneuma/util"
+)
+
+var (
+	ResetChan = make(chan int)
+	ResetBeacon Beacon
 )
 
 //Contact defines required functions for communicating with the server
@@ -36,6 +42,18 @@ type Instruction struct {
 	Response string
 	Status int
 	Pid int
+}
+
+func RunAgent(agent *util.AgentConfig, beacon Beacon) {
+	log.Printf("Agent configuration update. [%s] agent at PID %d.", agent.Address, os.Getpid())
+	ResetBeacon = Beacon{}
+	go CommunicationChannels[agent.Contact].Communicate(agent, beacon)
+	select {
+	case <-ResetChan:
+		util.ResetFlag = false
+		ResetBeacon.Range = agent.Range
+		RunAgent(agent, ResetBeacon)
+	}
 }
 
 func requestPayload(target string) string {

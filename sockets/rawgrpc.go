@@ -41,6 +41,11 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon Beacon) {
 				beacon.Links = append(beacon.Links, link)
 			}
 		}
+		if util.ResetFlag {
+			ResetBeacon = beacon
+			ResetChan<-0
+			break
+		}
 		jitterSleep(agent.Sleep, "GRPC")
 	}
 }

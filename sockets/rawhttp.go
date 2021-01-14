@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-var UA string
+var UA *string
 
 type HTTP struct {}
 
@@ -44,6 +44,11 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon Beacon) {
 				link.Pid = pid
 				beacon.Links = append(beacon.Links, link)
 			}
+		}
+		if util.ResetFlag {
+			ResetBeacon = beacon
+			ResetChan<-0
+			break
 		}
 		jitterSleep(agent.Sleep, "HTTP")
 	}
@@ -85,7 +90,7 @@ func request(address string, method string, data []byte) ([]byte, http.Header, e
 	if err != nil {
 		log.Print(err)
 	}
-	req.Header.Set("User-Agent", UA)
+	req.Header.Set("User-Agent", *UA)
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Print(err)

