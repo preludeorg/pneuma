@@ -7,6 +7,7 @@ import (
 	"github.com/preludeorg/pneuma/util"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	pb "github.com/preludeorg/pneuma/sockets/protos"
@@ -19,7 +20,8 @@ func init() {
 	CommunicationChannels["grpc"] = GRPC{}
 }
 
-func (contact GRPC) Communicate(agent *util.AgentConfig, beacon Beacon) {
+func (contact GRPC) Communicate(wg *sync.WaitGroup, agent *util.AgentConfig, beacon Beacon) {
+	defer wg.Done()
 	for {
 		beacon.Links = beacon.Links[:0]
 		for {

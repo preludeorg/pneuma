@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 )
 
 var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
@@ -50,5 +51,11 @@ func main() {
 	}
 	util.EncryptionKey = &agent.AESKey
 	log.Printf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
-	sockets.CommunicationChannels[agent.Contact].Communicate(agent, buildBeacon(agent.Name, agent.Range))
+
+	for {
+		var wg sync.WaitGroup
+		wg.Add(1)
+		sockets.CommunicationChannels[agent.Contact].Communicate(&wg, agent, buildBeacon(agent.Name, agent.Range))
+		wg.Wait()
+	}
 }

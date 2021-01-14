@@ -1,17 +1,18 @@
 package sockets
 
 import (
-	"github.com/preludeorg/pneuma/commands"
-	"github.com/preludeorg/pneuma/util"
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/preludeorg/pneuma/commands"
+	"github.com/preludeorg/pneuma/util"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
+	"sync"
 )
 
 var UA string
@@ -22,7 +23,8 @@ func init() {
 	CommunicationChannels["http"] = HTTP{}
 }
 
-func (contact HTTP) Communicate(agent *util.AgentConfig, beacon Beacon) {
+func (contact HTTP) Communicate(wg *sync.WaitGroup, agent *util.AgentConfig, beacon Beacon) {
+	defer wg.Done()
 	checkValidHTTPTarget(agent.Address, true)
 	for {
 		beacon.Links = beacon.Links[:0]

@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/preludeorg/pneuma/util"
@@ -12,7 +13,7 @@ import (
 
 //Contact defines required functions for communicating with the server
 type Contact interface {
-	Communicate(agent *util.AgentConfig, beacon Beacon)
+	Communicate(wg *sync.WaitGroup, agent *util.AgentConfig, beacon Beacon)
 }
 
 //CommunicationChannels contains the contact implementations

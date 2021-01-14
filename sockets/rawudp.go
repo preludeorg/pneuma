@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 )
 
 type UDP struct {}
@@ -19,7 +20,8 @@ func init() {
 	CommunicationChannels["udp"] = UDP{}
 }
 
-func (contact UDP) Communicate(agent *util.AgentConfig, beacon Beacon) {
+func (contact UDP) Communicate(wg *sync.WaitGroup, agent *util.AgentConfig, beacon Beacon) {
+	defer wg.Done()
 	for {
 		conn, err := net.Dial("udp", agent.Address)
 	   	if err != nil {
