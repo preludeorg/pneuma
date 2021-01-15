@@ -19,17 +19,17 @@ var UA *string
 type HTTP struct {}
 
 func init() {
-	CommunicationChannels["http"] = HTTP{}
+	util.CommunicationChannels["http"] = HTTP{}
 }
 
-func (contact HTTP) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
+func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
 	checkValidHTTPTarget(agent.Address, true)
 	for agent.Contact == "http" {
 		refreshBeacon(agent, &beacon)
 		beacon.Links = beacon.Links[:0]
 		for agent.Contact == "http" {
 			body := beaconPOST(agent.Address, beacon)
-			var tempB Beacon
+			var tempB util.Beacon
 			json.Unmarshal(body, &tempB)
 			if(len(tempB.Links)) == 0 {
 				break
@@ -72,7 +72,7 @@ func requestHTTPPayload(address string) ([]byte, string, error) {
 	return nil, "", err
 }
 
-func beaconPOST(address string, beacon Beacon) []byte {
+func beaconPOST(address string, beacon util.Beacon) []byte {
 	data, _ := json.Marshal(beacon)
 	body, _, _ := request(address, "POST", util.Encrypt(data))
 	if len(body) > 0 {
@@ -83,7 +83,7 @@ func beaconPOST(address string, beacon Beacon) []byte {
 
 func request(address string, method string, data []byte) ([]byte, http.Header, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
+	req, err := http.NewRequest(method, address, ioutil.NopCloser(bytes.NewBuffer(data)))
 	if err != nil {
 		log.Print(err)
 	}

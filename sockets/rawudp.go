@@ -15,10 +15,10 @@ import (
 type UDP struct {}
 
 func init() {
-	CommunicationChannels["udp"] = UDP{}
+	util.CommunicationChannels["udp"] = UDP{}
 }
 
-func (contact UDP) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
+func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
 	for agent.Contact == "udp" {
 		conn, err := net.Dial("udp", agent.Address)
 	   	if err != nil {
@@ -42,8 +42,8 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
 	return beacon
 }
 
-func udpRespond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConfig){
-	var tempB Beacon
+func udpRespond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
+	var tempB util.Beacon
 	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
 	beacon.Links = beacon.Links[:0]
 	for _, link := range tempB.Links {
@@ -61,7 +61,7 @@ func udpRespond(conn net.Conn, beacon Beacon, message string, agent *util.AgentC
 	udpBufferedSend(conn, beacon)
 }
 
-func udpBufferedSend(conn net.Conn, beacon Beacon) {
+func udpBufferedSend(conn net.Conn, beacon util.Beacon) {
 	data, _ := json.Marshal(beacon)
 	allData := bytes.NewReader(append(util.Encrypt(data), "\n"...))
 	sendBuffer := make([]byte, 1024)

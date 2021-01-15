@@ -15,10 +15,10 @@ import (
 type TCP struct {}
 
 func init() {
-	CommunicationChannels["tcp"] = TCP{}
+	util.CommunicationChannels["tcp"] = TCP{}
 }
 
-func (contact TCP) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
+func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
 	for agent.Contact == "tcp" {
 		conn, err := net.Dial("tcp", agent.Address)
 	   	if err != nil {
@@ -41,8 +41,8 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
 	return beacon
 }
 
-func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConfig){
-	var tempB Beacon
+func respond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
+	var tempB util.Beacon
 	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
 	beacon.Links = beacon.Links[:0]
 	for _, link := range tempB.Links {
@@ -60,7 +60,7 @@ func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConf
 	bufferedSend(conn, beacon)
 }
 
-func bufferedSend(conn net.Conn, beacon Beacon) {
+func bufferedSend(conn net.Conn, beacon util.Beacon) {
 	data, _ := json.Marshal(beacon)
 	allData := bytes.NewReader(append(util.Encrypt(data), "\n"...))
 	sendBuffer := make([]byte, 1024)

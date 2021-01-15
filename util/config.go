@@ -6,18 +6,47 @@ import (
 	"time"
 )
 
+//CommunicationChannels contains the contact implementations
+var CommunicationChannels = map[string]Contact{}
+
+//Contact defines required functions for communicating with the server
+type Contact interface {
+	Communicate(agent *AgentConfig, beacon Beacon) Beacon
+}
+
 type Configuration interface {
 	ApplyConfig(ac map[string]interface{})
 }
 
 type AgentConfig struct {
-		Name 	  string
-		AESKey    []byte
-		Range     string
-		Contact   string
-		Address   string
-		Useragent string
-		Sleep     int
+	Name 	  string
+	AESKey    []byte
+	Range     string
+	Contact   string
+	Address   string
+	Useragent string
+	Sleep     int
+}
+
+type Beacon struct {
+	Name string
+	Location string
+	Platform string
+	Executors []string
+	Range string
+	Sleep int
+	Pwd string
+	Links []Instruction
+}
+
+type Instruction struct {
+	ID string `json:"ID"`
+	Executor string `json:"Executor"`
+	Payload string `json:"Payload"`
+	Request string `json:"Request"`
+	Response string
+	Status int
+	Pid int
 }
 
 func BuildAgentConfig() *AgentConfig {
