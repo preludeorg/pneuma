@@ -84,16 +84,7 @@ func updateConfiguration(config string, agent *util.AgentConfig) (string, int, i
 		agent.SetAgentConfig(newConfig)
 		return "Successfully updated agent configuration.", 0, os.Getpid()
 	}
-	return string(err.Error()), 1, os.Getpid()
-}
-
-func contains(slice []string, s string) bool {
-	for _, v := range slice {
-		if v == s {
-			return true
-		}
-	}
-	return false
+	return err.Error(), 1, os.Getpid()
 }
 
 func splitMessage(message string, splitRune rune) []string {
