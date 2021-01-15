@@ -12,10 +12,10 @@ import (
 
 var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
-func buildBeacon(agent *util.AgentConfig) sockets.Beacon {
+func buildBeacon(agent *util.AgentConfig) util.Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
-	return sockets.Beacon{
+	return util.Beacon{
 		Name:      agent.Name,
 		Range:     agent.Range,
 		Sleep:	   agent.Sleep,
@@ -23,7 +23,7 @@ func buildBeacon(agent *util.AgentConfig) sockets.Beacon {
 		Location:  executable,
 		Platform:  runtime.GOOS,
 		Executors: util.DetermineExecutors(runtime.GOOS, runtime.GOARCH),
-		Links:     make([]sockets.Instruction, 0),
+		Links:     make([]util.Instruction, 0),
 	}
 }
 

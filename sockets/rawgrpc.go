@@ -16,16 +16,16 @@ import (
 type GRPC struct {}
 
 func init() {
-	CommunicationChannels["grpc"] = GRPC{}
+	util.CommunicationChannels["grpc"] = GRPC{}
 }
 
-func (contact GRPC) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
+func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
 	for agent.Contact == "grpc" {
 		refreshBeacon(agent, &beacon)
 		beacon.Links = beacon.Links[:0]
 		for agent.Contact == "grpc" {
 			body := beaconSend(agent.Address, beacon)
-			var tempB Beacon
+			var tempB util.Beacon
 			json.Unmarshal(body, &tempB)
 			if(len(tempB.Links)) == 0 {
 				break
@@ -47,7 +47,7 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon Beacon) Beacon {
 	return beacon
 }
 
-func beaconSend(address string, beacon Beacon) []byte {
+func beaconSend(address string, beacon util.Beacon) []byte {
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
