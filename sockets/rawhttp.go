@@ -87,6 +87,7 @@ func request(address string, method string, data []byte) ([]byte, http.Header, e
 	if err != nil {
 		log.Print(err)
 	}
+	req.Close = true
 	req.Header.Set("User-Agent", *UA)
 	resp, err := client.Do(req)
 	if err != nil {
