@@ -43,12 +43,12 @@ func main() {
 		"Useragent": *useragent,
 		"Sleep": *sleep,
 	})
-	sockets.UA = agent.Useragent
 	if !strings.Contains(agent.Address, ":") {
 		log.Println("Your address is incorrect")
 		os.Exit(1)
 	}
 	util.EncryptionKey = &agent.AESKey
+	sockets.UA = &agent.Useragent
 	log.Printf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
 	sockets.CommunicationChannels[agent.Contact].Communicate(agent, buildBeacon(agent.Name, agent.Range))
 }
