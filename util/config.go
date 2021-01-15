@@ -69,7 +69,7 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
 	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
 	if key, ok := ac["Contact"]; ok {
-		if _, ok = CommunicationChannels[key.(string)]; ok {
+		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
 			c.Contact = strings.ToLower(key.(string))
 			c.Address = applyKey(c.Address, ac, "Address").(string)
 		}
