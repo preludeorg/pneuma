@@ -3,6 +3,7 @@ package util
 import (
 	"math/rand"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -65,7 +66,7 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Name = applyKey(c.Name, ac, "Name").(string)
 	c.AESKey = applyKey(c.AESKey, ac, "AESKey").([]byte)
 	c.Range = applyKey(c.Range, ac, "Range").(string)
-	c.Contact = applyKey(c.Contact, ac, "Contact").(string)
+	c.Contact = strings.ToLower(applyKey(c.Contact, ac, "Contact").(string))
 	c.Address = applyKey(c.Address, ac, "Address").(string)
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
 	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)

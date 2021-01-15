@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/preludeorg/pneuma/commands"
+	beacon2 "github.com/preludeorg/pneuma/sockets/protos/beacon"
 	"github.com/preludeorg/pneuma/util"
 	"log"
 	"strings"
 	"time"
 
-	pb "github.com/preludeorg/pneuma/sockets/protos"
 	"google.golang.org/grpc"
 )
 
@@ -53,13 +53,13 @@ func beaconSend(address string, beacon util.Beacon) []byte {
 		log.Fatalf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
 	}
 	defer conn.Close()
-	c := pb.NewBeaconClient(conn)
+	c := beacon2.NewBeaconClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	data, _ := json.Marshal(beacon)
-	r, err := c.Handle(ctx, &pb.BeaconIncoming{Beacon: string(util.Encrypt(data))})
+	r, err := c.Handle(ctx, &beacon2.BeaconIncoming{Beacon: string(util.Encrypt(data))})
 	if err != nil {
 		return nil //no instructions for me
 	}
