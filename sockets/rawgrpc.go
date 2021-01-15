@@ -20,9 +20,8 @@ func init() {
 }
 
 func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
-	for agent.Contact == "grpc" {
+	for {
 		refreshBeacon(agent, &beacon)
-		beacon.Links = beacon.Links[:0]
 		for agent.Contact == "grpc" {
 			body := beaconSend(agent.Address, beacon)
 			var tempB util.Beacon
@@ -42,9 +41,12 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 				beacon.Links = append(beacon.Links, link)
 			}
 		}
+		if agent.Contact != "grpc" {
+			return beacon
+		}
+		beacon.Links = beacon.Links[:0]
 		jitterSleep(agent.Sleep, "GRPC")
 	}
-	return beacon
 }
 
 func beaconSend(address string, beacon util.Beacon) []byte {
