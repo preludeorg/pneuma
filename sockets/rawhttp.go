@@ -85,7 +85,7 @@ func beaconPOST(address string, beacon util.Beacon) []byte {
 
 func request(address string, method string, data []byte) ([]byte, http.Header, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest(method, address, ioutil.NopCloser(bytes.NewBuffer(data)))
+	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 	if err != nil {
 		log.Print(err)
 	}
