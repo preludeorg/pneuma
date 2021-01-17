@@ -5,3 +5,4 @@
 *.history/*
 .idea
 compiled/*
+payloads/*
