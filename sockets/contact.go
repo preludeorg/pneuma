@@ -33,6 +33,7 @@ func requestPayload(target string) string {
 	workingDir := "./"
 	path := filepath.Join(workingDir, filename)
 	util.SaveFile(bytes.NewReader(body), path)
+	os.Chmod(path, 0755)
 	return path
 }
 
