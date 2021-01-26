@@ -23,9 +23,7 @@ go run main.go -contact grpc -address 127.0.0.1:2513
 
 Change the address field to the location of Prelude Operator, if you are running your agent on a different computer.
 
-### Note on GRPC
-
-gRPC relies on protocol buffers to determine the structure of the data between client <--> server (beacons).
+> gRPC relies on protocol buffers to determine the structure of the data between client <--> server (beacons).
 This is statically compiled, so if anything changed in the beacon properties the following command will recompile
 the buffer:
 ```
