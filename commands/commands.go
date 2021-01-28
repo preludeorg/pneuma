@@ -43,7 +43,7 @@ func execute(command string, executor string) ([]byte, int, int) {
 	} else {
 		if executor == "python" {
 			bites, pid, status = execution(exec.Command("python", "-c", command))
-		} else if executor == "osascript" && runtime.GOOS == "darwin" {
+		} else if executor == "osa" && runtime.GOOS == "darwin" {
 			bites, pid, status = execution(exec.Command("osascript", "-e", command))
 		} else {
 			bites, pid, status = execution(exec.Command("sh", "-c", command))
