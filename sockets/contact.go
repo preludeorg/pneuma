@@ -23,6 +23,7 @@ func refreshBeacon(agent *util.AgentConfig, beacon *util.Beacon) {
 	beacon.Sleep = agent.Sleep
 	beacon.Range = agent.Range
 	beacon.Pwd = pwd
+	beacon.Target = agent.Address
 }
 
 func requestPayload(target string) string {
