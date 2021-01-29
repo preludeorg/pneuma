@@ -33,8 +33,14 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 ## Compile
 
 When you are ready to use Pneuma in a real environment, you will want to compile it into a binary by running the build.sh script, passing in any string as your unique (public) key, which ensures each compiled agent gets a different file hash:
-```
+```shell
 ./build.sh JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA
+```
+
+One windows you can build with:
+
+```powershell
+.\build.ps1 -key "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 ```
 
 This will output a file (into the payloads directory) for each supported operating system, which you can copy to any target system and execute normally
