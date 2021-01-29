@@ -6,26 +6,11 @@ import (
 	"github.com/preludeorg/pneuma/util"
 	"log"
 	"os"
-	"runtime"
 	"strings"
 )
 
 var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
-func buildBeacon(agent *util.AgentConfig) util.Beacon {
-	pwd, _ := os.Getwd()
-	executable, _ := os.Executable()
-	return util.Beacon{
-		Name:      agent.Name,
-		Range:     agent.Range,
-		Sleep:	   agent.Sleep,
-		Pwd:       pwd,
-		Location:  executable,
-		Platform:  runtime.GOOS,
-		Executors: util.DetermineExecutors(runtime.GOOS, runtime.GOARCH),
-		Links:     make([]util.Instruction, 0),
-	}
-}
 
 func main() {
 	agent := util.BuildAgentConfig()
@@ -51,5 +36,5 @@ func main() {
 	util.EncryptionKey = &agent.AESKey
 	sockets.UA = &agent.Useragent
 	log.Printf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
-	sockets.EventLoop(agent, buildBeacon(agent))
+	sockets.EventLoop(agent, agent.BuildBeacon())
 }
