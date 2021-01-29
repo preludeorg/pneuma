@@ -72,6 +72,8 @@ While Pneuma is designed to work with Prelude Operator, as an open-source agent 
 ```
 {
   "Name": "test",
+  "Target": "0.0.0.0:2323",
+  "Hostname": "ubuntu-host",
   "Location": "/tmp/me.go"
   "Platform": "darwin",
   "Executors": ["sh"],
