@@ -2,7 +2,9 @@ package util
 
 import (
 	"math/rand"
+	"os"
 	"reflect"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -17,6 +19,7 @@ type Contact interface {
 
 type Configuration interface {
 	ApplyConfig(ac map[string]interface{})
+	BuildBeacon() Beacon
 }
 
 type AgentConfig struct {
@@ -31,6 +34,8 @@ type AgentConfig struct {
 
 type Beacon struct {
 	Name string
+	Target string
+	Hostname string
 	Location string
 	Platform string
 	Executors []string
@@ -52,13 +57,13 @@ type Instruction struct {
 
 func BuildAgentConfig() *AgentConfig {
 	return &AgentConfig{
-		Name: pickName(12),
-		AESKey: []byte("abcdefghijklmnopqrstuvwxyz012345"),
-		Range: "red",
-		Contact: "tcp",
-		Address: "127.0.0.1:2323",
+		Name:      pickName(12),
+		AESKey:    []byte("abcdefghijklmnopqrstuvwxyz012345"),
+		Range:     "red",
+		Contact:   "tcp",
+		Address:   "127.0.0.1:2323",
 		Useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36",
-		Sleep: 60,
+		Sleep:     60,
 	}
 }
 
@@ -73,6 +78,24 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 			c.Contact = strings.ToLower(key.(string))
 			c.Address = applyKey(c.Address, ac, "Address").(string)
 		}
+	}
+}
+
+func (c *AgentConfig) BuildBeacon() Beacon {
+	pwd, _ := os.Getwd()
+	executable, _ := os.Executable()
+	hostname, _ := os.Hostname()
+	return Beacon {
+		Name:      c.Name,
+		Target:	   c.Address,
+		Hostname:  hostname,
+		Range:     c.Range,
+		Sleep:	   c.Sleep,
+		Pwd:       pwd,
+		Location:  executable,
+		Platform:  runtime.GOOS,
+		Executors: DetermineExecutors(runtime.GOOS, runtime.GOARCH),
+		Links:     make([]Instruction, 0),
 	}
 }
 
