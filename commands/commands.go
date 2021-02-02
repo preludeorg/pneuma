@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/preludeorg/pneuma/util"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -24,7 +23,7 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		}
 		return "Keyword selected not available for agent", 0, 0
 	} else {
-		log.Print("Running instruction")
+		util.DebugLogf("Running instruction")
 		bites, status, pid := execute(message, executor)
 		return string(bites), status, pid
 	}
@@ -61,6 +60,7 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 	var bites []byte
 	var status int
 	var pid int
+	command.SysProcAttr = getSysProcAttrs()
 	if out, err := command.Output(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			bites = exitError.Stderr

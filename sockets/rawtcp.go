@@ -7,7 +7,6 @@ import (
 	"github.com/preludeorg/pneuma/commands"
 	"github.com/preludeorg/pneuma/util"
 	"io"
-	"log"
 	"net"
 	"strings"
 )
@@ -22,7 +21,7 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 	for agent.Contact == "tcp" {
 		conn, err := net.Dial("tcp", agent.Address)
 	   	if err != nil {
-	   		log.Printf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
+	   		util.DebugLogf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
 			bufferedSend(conn, beacon)
 

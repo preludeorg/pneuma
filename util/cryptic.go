@@ -7,10 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
-	"log"
-
 	_ "fmt"
+	"io"
 )
 
 var EncryptionKey *[]byte
@@ -19,7 +17,7 @@ var EncryptionKey *[]byte
 func Encrypt(bites []byte) []byte {
 	plainText, err := pad(bites, aes.BlockSize)
 	if err != nil {
-		log.Print(err)
+		DebugLog(err)
 		return make([]byte, 0)
 	}
 	block, _ := aes.NewCipher(*EncryptionKey)
@@ -38,7 +36,7 @@ func Decrypt(text string) string {
 	cipherText, _ := hex.DecodeString(text)
 	block, err := aes.NewCipher(*EncryptionKey)
 	if err != nil {
-		log.Print(err)
+		DebugLog(err)
 		return ""
 	}
 	iv := cipherText[:aes.BlockSize]

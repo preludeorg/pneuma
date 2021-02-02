@@ -1,13 +1,12 @@
 package sockets
 
 import (
-	"github.com/preludeorg/pneuma/commands"
-	"github.com/preludeorg/pneuma/util"
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/preludeorg/pneuma/commands"
+	"github.com/preludeorg/pneuma/util"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -57,9 +56,9 @@ func checkValidHTTPTarget(address string, fatal bool) (bool, error) {
 	u, err := url.Parse(address)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		if fatal {
-			log.Fatalf("[%s] is an invalid URL for HTTP/S beacons", address)
+			util.DebugLogf("[%s] is an invalid URL for HTTP/S beacons", address)
 		}
-		log.Printf("[%s] is an invalid URL for HTTP/S beacons", address)
+		util.DebugLogf("[%s] is an invalid URL for HTTP/S beacons", address)
 		return false, errors.New("INVALID URL")
 	}
 	return true, nil
@@ -89,23 +88,23 @@ func request(address string, method string, data []byte) ([]byte, http.Header, i
 	client := &http.Client{}
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 	if err != nil {
-		log.Print(err)
+		util.DebugLog(err)
 	}
 	req.Close = true
 	req.Header.Set("User-Agent", *UA)
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Print(err)
+		util.DebugLog(err)
 		return nil, nil, 404, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Print(err)
+		util.DebugLog(err)
 		return nil, nil, resp.StatusCode, err
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		log.Print(err)
+		util.DebugLog(err)
 		return nil, nil, resp.StatusCode, err
 	}
 	return body, resp.Header, resp.StatusCode, err
