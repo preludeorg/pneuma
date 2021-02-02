@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 //RunCommand executes a given command
@@ -21,6 +22,8 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		task := splitMessage(message, '.')
 		if task[0] == "config" {
 			return updateConfiguration(task[1], agent)
+		} else if task[0] == "exit" {
+			return shutdown(agent)
 		}
 		return "Keyword selected not available for agent", 0, 0
 	} else {
@@ -87,6 +90,14 @@ func updateConfiguration(config string, agent *util.AgentConfig) (string, int, i
 		return "Successfully updated agent configuration.", 0, os.Getpid()
 	}
 	return err.Error(), 1, os.Getpid()
+}
+
+func shutdown(agent *util.AgentConfig) (string, int, int) {
+	go func(a *util.AgentConfig) {
+		time.Sleep(time.Duration(a.KillSleep) * time.Second)
+		os.Exit(0)
+	}(agent)
+	return fmt.Sprintf("Exiting agent in %d seconds", agent.KillSleep), 0, os.Getpid()
 }
 
 func splitMessage(message string, splitRune rune) []string {
