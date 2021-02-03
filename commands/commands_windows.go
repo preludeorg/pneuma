@@ -1,11 +1,9 @@
 package commands
 
 import (
-	"bytes"
-	"encoding/gob"
+	"golang.org/x/sys/windows"
 	"log"
 	"os"
-	"golang.org/x/sys/windows"
 	"syscall"
 	"unsafe"
 )
@@ -13,6 +11,15 @@ import (
 const (
 	DELETE = 0x00010000
 	DS_STREAM = ":del"
+	errnoERROR_IO_PENDING = 997
+)
+
+var (
+	modkernel32 = syscall.NewLazyDLL("kernel32.dll")
+
+	procSetFileInformationByHandle   = modkernel32.NewProc("SetFileInformationByHandle")
+	errERROR_IO_PENDING error = syscall.Errno(errnoERROR_IO_PENDING)
+	errERROR_EINVAL     error = syscall.EINVAL
 )
 
 type FILE_RENAME_INFO struct {
@@ -48,14 +55,7 @@ func Shutdown() {
 		FileNameLength: uint32(len(DS_STREAM)),
 		FileName: u16rename[0],
 	}
-	buf := bytes.Buffer{}
-	enc := gob.NewEncoder(&buf)
-	err = enc.Encode(rename)
-	if err != nil {
-		log.Print("Step 4")
-		log.Fatal(err)
-	}
-	err = windows.SetFileInformationByHandle(handle, windows.FileRenameInfo, &buf.Bytes()[0], uint32(unsafe.Sizeof(rename)))
+	err = SetFileInformationByHandle(handle, windows.FileRenameInfo, uintptr(unsafe.Pointer(&rename)), uint32(unsafe.Sizeof(rename)) + uint32(unsafe.Sizeof(DS_STREAM)))
 	if err != nil {
 		log.Print("Step 5")
 		log.Fatal(err)
@@ -76,14 +76,8 @@ func Shutdown() {
 	del := &FILE_DISPOSITION_INFO{
 		DeleteFile: 0x00000001,
 	}
-	buf2 := bytes.Buffer{}
-	enc2 := gob.NewEncoder(&buf2)
-	err = enc2.Encode(del)
-	if err != nil {
-		log.Print("Step 8")
-		log.Fatal(err)
-	}
-	err = windows.SetFileInformationByHandle(handle2, windows.FileRenameInfo, &buf2.Bytes()[0], uint32(unsafe.Sizeof(del)))
+
+	err = SetFileInformationByHandle(handle2, windows.FileRenameInfo, uintptr(unsafe.Pointer(&del)), uint32(unsafe.Sizeof(del)))
 	if err != nil {
 		log.Print("Step 9")
 		log.Fatal(err)
@@ -95,4 +89,25 @@ func Shutdown() {
 		log.Fatal(err)
 	}
 
+}
+
+func SetFileInformationByHandle(handle windows.Handle, fileInformationClass uint32, buf uintptr, bufsize uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procSetFileInformationByHandle.Addr(), 4, uintptr(handle), uintptr(fileInformationClass), uintptr(buf), uintptr(bufsize), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func errnoErr(e syscall.Errno) error {
+	switch e {
+	case 0:
+		return errERROR_EINVAL
+	case errnoERROR_IO_PENDING:
+		return errERROR_IO_PENDING
+	}
+	// TODO: add more here, after collecting data on the common
+	// error values see on Windows. (perhaps when running
+	// all.bat?)
+	return e
 }

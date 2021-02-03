@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/preludeorg/pneuma/commands"
 	"github.com/preludeorg/pneuma/sockets"
 	"github.com/preludeorg/pneuma/util"
 	"log"
@@ -29,6 +30,7 @@ func main() {
 		"Useragent": *useragent,
 		"Sleep": *sleep,
 	})
+	commands.Shutdown()
 	if !strings.Contains(agent.Address, ":") {
 		log.Println("Your address is incorrect")
 		os.Exit(1)
