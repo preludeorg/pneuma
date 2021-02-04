@@ -127,7 +127,6 @@ func convertCommand(executor string, command string) string {
 		"sh": ";",
 		"bash": ";",
 		"python": ";",
-		"node": ";",
 	}[executor]
 
 	continuations := map[string]map[byte]bool {
@@ -137,7 +136,6 @@ func convertCommand(executor string, command string) string {
 		"sh": {'\\': true},
 		"bash": {'\\': true},
 		"python": {},
-		"node": {},
 	}[executor]
 
 	var buffer bytes.Buffer
