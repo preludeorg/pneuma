@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"bytes"
 	"time"
 )
 
@@ -39,6 +40,7 @@ func execute(command string, executor string, agent *util.AgentConfig) ([]byte, 
 	var status int
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout) * time.Second)
 	defer cancel()
+	command = convertCommand(executor, command)
 	if runtime.GOOS == "windows" {
 		if executor == "cmd" {
 			bites, pid, status = execution(exec.CommandContext(ctx, "cmd.exe", "/c", command))
@@ -115,4 +117,45 @@ func splitMessage(message string, splitRune rune) []string {
 		return !quoted && r == splitRune
 	})
 	return values
+}
+
+func convertCommand(executor string, command string) string {
+	delimiter := map[string]string {
+		"psh": ";",
+		"pwsh": ";",
+		"cmd": "&",
+		"sh": ";",
+		"bash": ";",
+		"python": ";",
+		"node": ";",
+	}[executor]
+
+	continuations := map[string]map[byte]bool {
+		"psh": {'`': true},
+		"pwsh": {'`': true},
+		"cmd": {'^': true},
+		"sh": {'\\': true},
+		"bash": {'\\': true},
+		"python": {},
+		"node": {},
+	}[executor]
+
+	var buffer bytes.Buffer
+	parts := strings.Split(strings.TrimSpace(command), "\n")
+	for i := range parts {
+		part := strings.TrimSpace(buffer.String())
+		var terminal byte
+		if len(part) > 0 {
+			terminal = part[len(part)-1]
+		}
+		
+		if _, cont := continuations[terminal]; ((i == 0) || cont) {
+		    buffer.WriteString(parts[i])
+		} else {
+		 	buffer.WriteString(delimiter)
+		    buffer.WriteString(parts[i])
+		}
+	}
+
+	return buffer.String()
 }
