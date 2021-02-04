@@ -1,6 +1,7 @@
 package sockets
 
 import (
+	"crypto/tls"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -19,6 +20,7 @@ type HTTP struct {}
 
 func init() {
 	util.CommunicationChannels["http"] = HTTP{}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 }
 
 func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
