@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/preludeorg/pneuma/util"
@@ -27,29 +28,34 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		return "Keyword selected not available for agent", 0, 0
 	} else {
 		util.DebugLogf("Running instruction")
-		bites, status, pid := execute(message, executor)
+		bites, status, pid := execute(message, executor, agent)
 		return string(bites), status, pid
 	}
 }
 
-func execute(command string, executor string) ([]byte, int, int) {
+func execute(command string, executor string, agent *util.AgentConfig) ([]byte, int, int) {
 	var bites []byte
 	var pid int
 	var status int
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout) * time.Second)
+	defer cancel()
 	if runtime.GOOS == "windows" {
 		if executor == "cmd" {
-			bites, pid, status = execution(exec.Command("cmd.exe", "/c", command))
+			bites, pid, status = execution(exec.CommandContext(ctx, "cmd.exe", "/c", command))
 		} else {
-			bites, pid, status = execution(exec.Command("powershell.exe", "-ExecutionPolicy", "Bypass", "-C", command))
+			bites, pid, status = execution(exec.CommandContext(ctx, "powershell.exe", "-ExecutionPolicy", "Bypass", "-C", command))
 		}
 	} else {
 		if executor == "python" {
-			bites, pid, status = execution(exec.Command("python", "-c", command))
+			bites, pid, status = execution(exec.CommandContext(ctx, "python", "-c", command))
 		} else if executor == "osa" && runtime.GOOS == "darwin" {
-			bites, pid, status = execution(exec.Command("osascript", "-e", command))
+			bites, pid, status = execution(exec.CommandContext(ctx, "osascript", "-e", command))
 		} else {
-			bites, pid, status = execution(exec.Command("sh", "-c", command))
+			bites, pid, status = execution(exec.CommandContext(ctx, "sh", "-c", command))
 		}
+	}
+	if ctx.Err() == context.DeadlineExceeded {
+		bites = []byte("Command timed out.")
 	}
 	return []byte(fmt.Sprintf("%s%s", bites, "\n")), status, pid
 }
@@ -68,7 +74,7 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 		if exitError, ok := err.(*exec.ExitError); ok {
 			bites = exitError.Stderr
 			pid = exitError.Pid()
-			status = exitError.ExitCode()
+			status = exitError.ProcessState.ExitCode()
 		} else {
 			bites = []byte(err.Error())
 			pid = -1

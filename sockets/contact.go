@@ -13,7 +13,7 @@ import (
 func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
 	respBeacon := util.CommunicationChannels[agent.Contact].Communicate(agent, beacon)
 	refreshBeacon(agent, &respBeacon)
-	util.DebugLogf("C2 refreshed. [%s] agent at PID %d.", agent.Address, os.Getpid())
+	util.DebugLogf("C2 refreshed. [%s] agent at PID %d.", agent.Address, agent.Pid)
 	EventLoop(agent, respBeacon)
 }
 
