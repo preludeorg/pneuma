@@ -3,3 +3,5 @@
 package util
 
 func HideConsole() {}
+
+func ShowConsole() {}
