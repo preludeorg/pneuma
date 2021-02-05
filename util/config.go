@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var debugMode bool
+var DebugMode *bool
 
 //CommunicationChannels contains the contact implementations
 var CommunicationChannels = map[string]Contact{}
@@ -32,7 +32,6 @@ type AgentConfig struct {
 	Contact   string
 	Address   string
 	Useragent string
-	Debug 	  bool
 	Sleep     int
 	KillSleep int
 }
@@ -69,7 +68,6 @@ func BuildAgentConfig() *AgentConfig {
 		Address:   "127.0.0.1:2323",
 		Useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36",
 		Sleep:     60,
-		Debug: 	   false,
 		KillSleep: 5,
 	}
 }
@@ -80,7 +78,6 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Range = applyKey(c.Range, ac, "Range").(string)
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
 	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
-	debugMode = applyKey(c.Debug, ac, "Debug").(bool)
 	if key, ok := ac["Contact"]; ok {
 		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
 			c.Contact = strings.ToLower(key.(string))
@@ -108,13 +105,13 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 }
 
 func DebugLogf(format string, v ...interface{}) {
-	if debugMode {
+	if *DebugMode {
 		log.Printf(format, v...)
 	}
 }
 
 func DebugLog(v ...interface{}) {
-	if debugMode {
+	if *DebugMode {
 		log.Print(v...)
 	}
 }
