@@ -34,6 +34,8 @@ type AgentConfig struct {
 	Useragent string
 	Sleep     int
 	KillSleep int
+	CommandTimeout int
+	Pid int
 }
 
 type Beacon struct {
@@ -69,6 +71,8 @@ func BuildAgentConfig() *AgentConfig {
 		Useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36",
 		Sleep:     60,
 		KillSleep: 5,
+		CommandTimeout: 60,
+		Pid: os.Getpid(),
 	}
 }
 
