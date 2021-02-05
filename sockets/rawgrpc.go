@@ -6,7 +6,6 @@ import (
 	"github.com/preludeorg/pneuma/commands"
 	beacon2 "github.com/preludeorg/pneuma/sockets/protos/beacon"
 	"github.com/preludeorg/pneuma/util"
-	"log"
 	"strings"
 	"time"
 
@@ -52,7 +51,7 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 func beaconSend(address string, beacon util.Beacon) []byte {
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
+		util.DebugLogf("[-] %s is either unavailable or a firewall is blocking traffic.", address)
 	}
 	defer conn.Close()
 	c := beacon2.NewBeaconClient(conn)

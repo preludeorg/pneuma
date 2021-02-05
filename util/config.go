@@ -1,6 +1,7 @@
 package util
 
 import (
+	"log"
 	"math/rand"
 	"os"
 	"reflect"
@@ -8,6 +9,8 @@ import (
 	"strings"
 	"time"
 )
+
+var DebugMode *bool
 
 //CommunicationChannels contains the contact implementations
 var CommunicationChannels = map[string]Contact{}
@@ -98,6 +101,18 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 		Platform:  runtime.GOOS,
 		Executors: DetermineExecutors(runtime.GOOS, runtime.GOARCH),
 		Links:     make([]Instruction, 0),
+	}
+}
+
+func DebugLogf(format string, v ...interface{}) {
+	if *DebugMode {
+		log.Printf(format, v...)
+	}
+}
+
+func DebugLog(v ...interface{}) {
+	if *DebugMode {
+		log.Print(v...)
 	}
 }
 

@@ -2,7 +2,6 @@ package sockets
 
 import (
 	"bytes"
-	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -14,7 +13,7 @@ import (
 func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
 	respBeacon := util.CommunicationChannels[agent.Contact].Communicate(agent, beacon)
 	refreshBeacon(agent, &respBeacon)
-	log.Printf("C2 refreshed. [%s] agent at PID %d.", agent.Address, os.Getpid())
+	util.DebugLogf("C2 refreshed. [%s] agent at PID %d.", agent.Address, os.Getpid())
 	EventLoop(agent, respBeacon)
 }
 
@@ -44,6 +43,6 @@ func jitterSleep(sleep int, beaconType string) {
 	min := int(float64(sleep) * .90)
 	max := int(float64(sleep) * 1.10)
 	randomSleep := rand.Intn(max - min + 1) + min
-	log.Printf("[%s] Next beacon going out in %d seconds", beaconType, randomSleep)
+	util.DebugLogf("[%s] Next beacon going out in %d seconds", beaconType, randomSleep)
 	time.Sleep(time.Duration(randomSleep) * time.Second)
 }
