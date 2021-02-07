@@ -10,7 +10,10 @@ import (
 	"time"
 )
 
-var DebugMode *bool
+var (
+	DebugMode *bool
+	BackupConfig *AgentConfig
+)
 
 //CommunicationChannels contains the contact implementations
 var CommunicationChannels = map[string]Contact{}
