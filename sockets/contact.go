@@ -3,6 +3,7 @@ package sockets
 import (
 	"bytes"
 	"errors"
+	"github.com/preludeorg/pneuma/commands"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -17,6 +18,25 @@ func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
 	refreshBeacon(agent, &respBeacon)
 	util.DebugLogf("C2 refreshed. [%s] agent at PID %d.", agent.Address, agent.Pid)
 	EventLoop(agent, respBeacon)
+}
+
+func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, delimiter string) {
+	for _, link := range tempB.Links {
+		var payloadPath string
+		var payloadErr error
+		if len(link.Payload) > 0 {
+			payloadPath, payloadErr = requestPayload(link.Payload)
+		}
+		if payloadErr == nil {
+			response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
+			link.Response = strings.TrimSpace(response) + delimiter
+			link.Status = status
+			link.Pid = pid
+		} else {
+			payloadErrorResponse(payloadErr, agent, &link)
+		}
+		beacon.Links = append(beacon.Links, link)
+	}
 }
 
 func refreshBeacon(agent *util.AgentConfig, beacon *util.Beacon) {
@@ -52,7 +72,7 @@ func requestPayload(target string) (string, error) {
 
 func payloadErrorResponse(err error, agent *util.AgentConfig, link *util.Instruction) {
 	link.Response = "Payload Error: " + strings.TrimSpace(err.Error())
-	link.Status = -1
+	link.Status = 1
 	link.Pid = agent.Pid
 }
 
