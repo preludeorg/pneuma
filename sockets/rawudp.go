@@ -42,9 +42,10 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 
 func udpRespond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
 	var tempB util.Beacon
-	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
-	beacon.Links = beacon.Links[:0]
-	runLinks(&tempB, &beacon, agent, "\r\n")
+	if err := json.Unmarshal([]byte(util.Decrypt(message)), &tempB); err == nil {
+		beacon.Links = beacon.Links[:0]
+		runLinks(&tempB, &beacon, agent, "\r\n")
+	}
 	refreshBeacon(agent, &beacon)
 	udpBufferedSend(conn, beacon)
 }
@@ -58,6 +59,9 @@ func udpBufferedSend(conn net.Conn, beacon util.Beacon) {
 		if err == io.EOF {
 			return
 		}
-		conn.Write(sendBuffer)
+		_, err = conn.Write(sendBuffer)
+		if err != nil {
+			util.DebugLog(err)
+		}
 	}
 }

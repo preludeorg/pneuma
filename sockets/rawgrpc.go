@@ -22,8 +22,7 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 		for agent.Contact == "grpc" {
 			body := beaconSend(agent.Address, beacon)
 			var tempB util.Beacon
-			json.Unmarshal(body, &tempB)
-			if(len(tempB.Links)) == 0 {
+			if err := json.Unmarshal(body, &tempB); err != nil || len(tempB.Links) == 0 {
 				break
 			}
 			runLinks(&tempB, &beacon, agent, "")
