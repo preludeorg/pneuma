@@ -17,7 +17,7 @@ var CommunicationChannels = map[string]Contact{}
 
 //Contact defines required functions for communicating with the server
 type Contact interface {
-	Communicate(agent *AgentConfig, beacon Beacon) Beacon
+	Communicate(agent *AgentConfig, beacon Beacon, message string) (Beacon, string)
 }
 
 type Configuration interface {

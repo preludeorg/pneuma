@@ -16,7 +16,7 @@ func init() {
 	util.CommunicationChannels["tcp"] = TCP{}
 }
 
-func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
+func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon, msg string) (util.Beacon, string) {
 	for agent.Contact == "tcp" {
 		conn, err := net.Dial("tcp", agent.Address)
 	   	if err != nil {
@@ -28,15 +28,15 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 			scanner := bufio.NewScanner(conn)
 			for scanner.Scan() {
 				message := strings.TrimSpace(scanner.Text())
-				respond(conn, beacon, message, agent)
 				if agent.Contact != "tcp" {
-					return beacon
+					return beacon, message
 				}
+				respond(conn, beacon, message, agent)
 			}
 	   	}
 	   	jitterSleep(agent.Sleep, "TCP")
 	}
-	return beacon
+	return beacon, ""
 }
 
 func respond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
