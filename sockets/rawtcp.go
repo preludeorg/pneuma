@@ -58,8 +58,7 @@ func bufferedSend(conn net.Conn, beacon util.Beacon) {
 		if err == io.EOF {
 			return
 		}
-		_, err = conn.Write(sendBuffer)
-		if err != nil {
+		if _, err = conn.Write(sendBuffer); err != nil {
 			util.DebugLog(err)
 		}
 	}
