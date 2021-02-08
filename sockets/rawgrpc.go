@@ -3,10 +3,8 @@ package sockets
 import (
 	"context"
 	"encoding/json"
-	"github.com/preludeorg/pneuma/commands"
 	beacon2 "github.com/preludeorg/pneuma/sockets/protos/beacon"
 	"github.com/preludeorg/pneuma/util"
-	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -28,17 +26,7 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 			if(len(tempB.Links)) == 0 {
 				break
 			}
-			for _, link := range tempB.Links {
-				var payloadPath string
-				if len(link.Payload) > 0 {
-					payloadPath = requestPayload(link.Payload)
-				}
-				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
-				link.Response = strings.TrimSpace(response)
-				link.Status = status
-				link.Pid = pid
-				beacon.Links = append(beacon.Links, link)
-			}
+			runLinks(&tempB, &beacon, agent, "")
 		}
 		if agent.Contact != "grpc" {
 			return beacon

