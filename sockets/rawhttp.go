@@ -28,8 +28,7 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 		for agent.Contact == "http" {
 			body := beaconPOST(agent.Address, beacon)
 			var tempB util.Beacon
-			json.Unmarshal(body, &tempB)
-			if(len(tempB.Links)) == 0 {
+			if err := json.Unmarshal(body, &tempB); err != nil || len(tempB.Links) == 0 {
 				break
 			}
 			runLinks(&tempB, &beacon, agent, "")
