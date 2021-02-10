@@ -1,11 +1,15 @@
 package util
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"io"
 	"log"
 	"math/rand"
 	"os"
 	"reflect"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 )
@@ -36,6 +40,7 @@ type AgentConfig struct {
 	KillSleep int
 	CommandTimeout int
 	Pid int
+	Executing map[string]Instruction
 }
 
 type Beacon struct {
@@ -48,6 +53,7 @@ type Beacon struct {
 	Range string
 	Sleep int
 	Pwd string
+	Executing string
 	Links []Instruction
 }
 
@@ -73,6 +79,7 @@ func BuildAgentConfig() *AgentConfig {
 		KillSleep: 5,
 		CommandTimeout: 60,
 		Pid: os.Getpid(),
+		Executing: make(map[string]Instruction),
 	}
 }
 
@@ -90,6 +97,41 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	}
 }
 
+func (c *AgentConfig) StartInstruction(instruction Instruction) bool {
+	if _, ex := c.Executing[instruction.ID]; ex {
+		return false
+	} else {
+		c.Executing[instruction.ID] = instruction
+		return true
+	}
+}
+
+func (c *AgentConfig) EndInstruction(instruction Instruction) {
+	delete(c.Executing, instruction.ID)
+}
+
+func (c *AgentConfig) BuildExecutingHash() string {
+	count := len(c.Executing)
+	if (count > 0) {
+		ids := make([]string, count)
+		i := 0
+		for k := range c.Executing {
+			ids[i] = k
+			i++
+		}
+		sort.Strings(ids)
+		h := md5.New()
+		for _, s := range ids {
+			io.WriteString(h, s)
+			io.WriteString(h, s)
+		}
+		return hex.EncodeToString(h.Sum(nil))
+	} else {
+		return ""
+	}
+
+}
+
 func (c *AgentConfig) BuildBeacon() Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
@@ -104,6 +146,7 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 		Location:  executable,
 		Platform:  runtime.GOOS,
 		Executors: DetermineExecutors(runtime.GOOS, runtime.GOARCH),
+		Executing: c.BuildExecutingHash(),
 		Links:     make([]Instruction, 0),
 	}
 }

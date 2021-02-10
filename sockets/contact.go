@@ -22,20 +22,23 @@ func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
 
 func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, delimiter string) {
 	for _, link := range tempB.Links {
-		var payloadPath string
-		var payloadErr error
-		if len(link.Payload) > 0 {
-			payloadPath, payloadErr = requestPayload(link.Payload)
+		if agent.StartInstruction(link) {
+			var payloadPath string
+			var payloadErr error
+			if len(link.Payload) > 0 {
+				payloadPath, payloadErr = requestPayload(link.Payload)
+			}
+			if payloadErr == nil {
+				response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
+				link.Response = strings.TrimSpace(response) + delimiter
+				link.Status = status
+				link.Pid = pid
+			} else {
+				payloadErrorResponse(payloadErr, agent, &link)
+			}
+			beacon.Links = append(beacon.Links, link)
+			agent.EndInstruction(link)
 		}
-		if payloadErr == nil {
-			response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
-			link.Response = strings.TrimSpace(response) + delimiter
-			link.Status = status
-			link.Pid = pid
-		} else {
-			payloadErrorResponse(payloadErr, agent, &link)
-		}
-		beacon.Links = append(beacon.Links, link)
 	}
 }
 
