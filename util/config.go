@@ -129,7 +129,6 @@ func (c *AgentConfig) BuildExecutingHash() string {
 	} else {
 		return ""
 	}
-
 }
 
 func (c *AgentConfig) BuildBeacon() Beacon {
