@@ -106,6 +106,15 @@ func (c *AgentConfig) StartInstruction(instruction Instruction) bool {
 	}
 }
 
+func (c *AgentConfig) StartInstructions(instructions []Instruction) (ret []Instruction) {
+	for _, i := range instructions {
+		if c.StartInstruction(i) {
+			ret = append(ret, i)
+		}
+	}
+	return
+}
+
 func (c *AgentConfig) EndInstruction(instruction Instruction) {
 	delete(c.Executing, instruction.ID)
 }
@@ -144,7 +153,7 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 		Location:  executable,
 		Platform:  runtime.GOOS,
 		Executors: DetermineExecutors(runtime.GOOS, runtime.GOARCH),
-		Executing: c.BuildExecutingHash(),
+		Executing: "",
 		Links:     make([]Instruction, 0),
 	}
 }
