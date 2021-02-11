@@ -33,6 +33,7 @@ type Operation interface {
 	StartInstructions(instructions []Instruction) (ret []Instruction)
 	StartInstruction(instruction Instruction) bool
 	EndInstruction(instruction Instruction)
+	BuildExecutingHash() string
 }
 
 type AgentConfig struct {
