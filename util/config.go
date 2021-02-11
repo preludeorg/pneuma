@@ -29,6 +29,12 @@ type Configuration interface {
 	BuildBeacon() Beacon
 }
 
+type Operation interface {
+	StartInstructions(instructions []Instruction) (ret []Instruction)
+	StartInstruction(instruction Instruction) bool
+	EndInstruction(instruction Instruction)
+}
+
 type AgentConfig struct {
 	Name 	  string
 	AESKey    []byte
@@ -100,10 +106,9 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 func (c *AgentConfig) StartInstruction(instruction Instruction) bool {
 	if _, ex := c.Executing[instruction.ID]; ex {
 		return false
-	} else {
-		c.Executing[instruction.ID] = instruction
-		return true
 	}
+	c.Executing[instruction.ID] = instruction
+	return true
 }
 
 func (c *AgentConfig) StartInstructions(instructions []Instruction) (ret []Instruction) {
@@ -120,13 +125,10 @@ func (c *AgentConfig) EndInstruction(instruction Instruction) {
 }
 
 func (c *AgentConfig) BuildExecutingHash() string {
-	count := len(c.Executing)
-	if (count > 0) {
+	if count := len(c.Executing); count > 0 {
 		ids := make([]string, count)
-		i := 0
-		for k := range c.Executing {
-			ids[i] = k
-			i++
+		for id := range c.Executing {
+			ids = append(ids, id)
 		}
 		sort.Strings(ids)
 		h := md5.New()
@@ -134,9 +136,8 @@ func (c *AgentConfig) BuildExecutingHash() string {
 			io.WriteString(h, s)
 		}
 		return hex.EncodeToString(h.Sum(nil))
-	} else {
-		return ""
 	}
+	return ""
 }
 
 func (c *AgentConfig) BuildBeacon() Beacon {
