@@ -123,7 +123,6 @@ func (c *AgentConfig) BuildExecutingHash() string {
 		h := md5.New()
 		for _, s := range ids {
 			io.WriteString(h, s)
-			io.WriteString(h, s)
 		}
 		return hex.EncodeToString(h.Sum(nil))
 	} else {
