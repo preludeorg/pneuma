@@ -22,7 +22,6 @@ func main() {
 	group := flag.String("range", agent.Range, "Which range to associate to")
 	sleep := flag.Int("sleep", agent.Sleep, "Number of seconds to sleep between beacons")
 	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting")
-	bypassDns := flag.Bool("bypassDNS", agent.BypassDNS, "Bypass DNS resolution to target")
 	util.DebugMode = flag.Bool("debug", false, "Write debug output to console")
 	flag.Parse()
 	agent.SetAgentConfig(map[string]interface{}{
@@ -32,7 +31,6 @@ func main() {
 		"Range": *group,
 		"Useragent": *useragent,
 		"Sleep": *sleep,
-		"BypassDNS": *bypassDns,
 	})
 	if *util.DebugMode {
 		util.ShowConsole()

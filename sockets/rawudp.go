@@ -40,8 +40,6 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 	return beacon
 }
 
-func (contact UDP) SetProtocolConfiguration(agent *util.AgentConfig) {}
-
 func udpRespond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
 	var tempB util.Beacon
 	if err := json.Unmarshal([]byte(util.Decrypt(message)), &tempB); err == nil {

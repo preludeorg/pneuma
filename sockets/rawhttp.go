@@ -2,17 +2,14 @@ package sockets
 
 import (
 	"bytes"
-	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"github.com/preludeorg/pneuma/util"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"net/url"
 	"path"
-	"time"
 )
 
 var UA *string
@@ -21,10 +18,11 @@ type HTTP struct {}
 
 func init() {
 	util.CommunicationChannels["http"] = HTTP{}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 }
 
 func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
-	//checkValidHTTPTarget(agent.Address, true)
+	checkValidHTTPTarget(agent.Address, true)
 	for {
 		refreshBeacon(agent, &beacon)
 		for agent.Contact == "http" {
@@ -41,20 +39,6 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 		beacon.Links = beacon.Links[:0]
 		jitterSleep(agent.Sleep, "HTTP")
 	}
-}
-func (contact HTTP) SetProtocolConfiguration(agent *util.AgentConfig) {
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	if agent.BypassDNS {
-		dialer := &net.Dialer{
-			KeepAlive: 15 * time.Second,
-			Timeout: 180 * time.Second,
-			DualStack: true,
-		}
-		http.DefaultTransport.(*http.Transport).DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-			return dialer.DialContext(ctx, network, addr)
-		}
-	}
-	return
 }
 
 func checkValidHTTPTarget(address string, fatal bool) (bool, error) {
@@ -97,7 +81,6 @@ func request(address string, method string, data []byte) ([]byte, http.Header, i
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 	if err != nil {
 		util.DebugLog(err)
-		return nil, nil, 404, err
 	}
 	req.Close = true
 	req.Header.Set("User-Agent", *UA)

@@ -14,7 +14,6 @@ import (
 )
 
 func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
-	util.CommunicationChannels[agent.Contact].SetProtocolConfiguration(agent)
 	respBeacon := util.CommunicationChannels[agent.Contact].Communicate(agent, beacon)
 	refreshBeacon(agent, &respBeacon)
 	util.DebugLogf("C2 refreshed. [%s] agent at PID %d.", agent.Address, agent.Pid)
