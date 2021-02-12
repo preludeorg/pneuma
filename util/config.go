@@ -1,11 +1,15 @@
 package util
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"io"
 	"log"
 	"math/rand"
 	"os"
 	"reflect"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 )
@@ -25,6 +29,13 @@ type Configuration interface {
 	BuildBeacon() Beacon
 }
 
+type Operation interface {
+	StartInstructions(instructions []Instruction) (ret []Instruction)
+	StartInstruction(instruction Instruction) bool
+	EndInstruction(instruction Instruction)
+	BuildExecutingHash() string
+}
+
 type AgentConfig struct {
 	Name 	  string
 	AESKey    []byte
@@ -36,6 +47,7 @@ type AgentConfig struct {
 	KillSleep int
 	CommandTimeout int
 	Pid int
+	Executing map[string]Instruction
 }
 
 type Beacon struct {
@@ -48,6 +60,7 @@ type Beacon struct {
 	Range string
 	Sleep int
 	Pwd string
+	Executing string
 	Links []Instruction
 }
 
@@ -73,6 +86,7 @@ func BuildAgentConfig() *AgentConfig {
 		KillSleep: 5,
 		CommandTimeout: 60,
 		Pid: os.Getpid(),
+		Executing: make(map[string]Instruction),
 	}
 }
 
@@ -90,6 +104,43 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	}
 }
 
+func (c *AgentConfig) StartInstruction(instruction Instruction) bool {
+	if _, ex := c.Executing[instruction.ID]; ex {
+		return false
+	}
+	c.Executing[instruction.ID] = instruction
+	return true
+}
+
+func (c *AgentConfig) StartInstructions(instructions []Instruction) (ret []Instruction) {
+	for _, i := range instructions {
+		if c.StartInstruction(i) {
+			ret = append(ret, i)
+		}
+	}
+	return
+}
+
+func (c *AgentConfig) EndInstruction(instruction Instruction) {
+	delete(c.Executing, instruction.ID)
+}
+
+func (c *AgentConfig) BuildExecutingHash() string {
+	if count := len(c.Executing); count > 0 {
+		ids := make([]string, count)
+		for id := range c.Executing {
+			ids = append(ids, id)
+		}
+		sort.Strings(ids)
+		h := md5.New()
+		for _, s := range ids {
+			io.WriteString(h, s)
+		}
+		return hex.EncodeToString(h.Sum(nil))
+	}
+	return ""
+}
+
 func (c *AgentConfig) BuildBeacon() Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
@@ -104,6 +155,7 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 		Location:  executable,
 		Platform:  runtime.GOOS,
 		Executors: DetermineExecutors(runtime.GOOS, runtime.GOARCH),
+		Executing: "",
 		Links:     make([]Instruction, 0),
 	}
 }

@@ -21,7 +21,7 @@ func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
 }
 
 func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, delimiter string) {
-	for _, link := range tempB.Links {
+	for _, link := range agent.StartInstructions(tempB.Links) {
 		var payloadPath string
 		var payloadErr error
 		if len(link.Payload) > 0 {
@@ -36,6 +36,7 @@ func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, 
 			payloadErrorResponse(payloadErr, agent, &link)
 		}
 		beacon.Links = append(beacon.Links, link)
+		agent.EndInstruction(link)
 	}
 }
 
@@ -45,6 +46,7 @@ func refreshBeacon(agent *util.AgentConfig, beacon *util.Beacon) {
 	beacon.Range = agent.Range
 	beacon.Pwd = pwd
 	beacon.Target = agent.Address
+	beacon.Executing = agent.BuildExecutingHash()
 }
 
 func requestPayload(target string) (string, error) {
