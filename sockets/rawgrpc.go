@@ -35,6 +35,8 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 	}
 }
 
+func (contact GRPC) SetProtocolConfiguration(agent *util.AgentConfig) {}
+
 func beaconSend(address string, beacon util.Beacon) []byte {
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {

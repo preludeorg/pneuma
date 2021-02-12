@@ -22,6 +22,7 @@ var CommunicationChannels = map[string]Contact{}
 //Contact defines required functions for communicating with the server
 type Contact interface {
 	Communicate(agent *AgentConfig, beacon Beacon) Beacon
+	SetProtocolConfiguration(agent *AgentConfig)
 }
 
 type Configuration interface {
@@ -48,6 +49,7 @@ type AgentConfig struct {
 	CommandTimeout int
 	Pid int
 	Executing map[string]Instruction
+	BypassDNS bool
 }
 
 type Beacon struct {
@@ -87,6 +89,7 @@ func BuildAgentConfig() *AgentConfig {
 		CommandTimeout: 60,
 		Pid: os.Getpid(),
 		Executing: make(map[string]Instruction),
+		BypassDNS: false,
 	}
 }
 
@@ -96,6 +99,7 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Range = applyKey(c.Range, ac, "Range").(string)
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
 	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
+	c.BypassDNS = applyKey(c.BypassDNS, ac, "BypassDNS").(bool)
 	if key, ok := ac["Contact"]; ok {
 		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
 			c.Contact = strings.ToLower(key.(string))
