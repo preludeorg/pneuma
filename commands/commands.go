@@ -39,6 +39,7 @@ func execute(command string, executor string, agent *util.AgentConfig) ([]byte, 
 	var status int
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout) * time.Second)
 	defer cancel()
+	command = convertCommand(executor, command)
 	if runtime.GOOS == "windows" {
 		if executor == "cmd" {
 			bites, pid, status = execution(exec.CommandContext(ctx, "cmd.exe", "/c", command))
@@ -115,4 +116,36 @@ func splitMessage(message string, splitRune rune) []string {
 		return !quoted && r == splitRune
 	})
 	return values
+}
+
+func convertCommand(executor string, command string) string {
+	parts := strings.Split(strings.TrimSpace(command), "\n")
+	delimiters := map[string]string{
+		"psh":    ";",
+		"pwsh":   ";",
+		"cmd":    "&",
+		"sh":     ";",
+		"python": ";",
+	}
+	if delimiter, ok := delimiters[executor]; len(parts) > 1 && ok {
+		return splitAndTrim(parts, delimiter)
+	}
+	return command
+}
+
+func splitAndTrim(parts []string, delimiter string) string {
+	n := len(delimiter) * (len(parts) - 1)
+	for i := 0; i < len(parts); i++ {
+		n += len(parts[i])
+	}
+
+	var c strings.Builder
+	c.Grow(n)
+	c.WriteString(strings.TrimSuffix(parts[0], delimiter))
+	for _, p := range parts[1:] {
+		c.WriteString(delimiter)
+		c.WriteString(strings.TrimSuffix(p, delimiter))
+	}
+
+	return c.String()
 }
