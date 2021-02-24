@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"bytes"
 	"time"
 )
 
@@ -120,40 +119,17 @@ func splitMessage(message string, splitRune rune) []string {
 }
 
 func convertCommand(executor string, command string) string {
-	delimiter := map[string]string {
-		"psh": ";",
-		"pwsh": ";",
-		"cmd": "&",
-		"sh": ";",
-		"bash": ";",
-		"python": ";",
-	}[executor]
-
-	continuations := map[string]map[byte]bool {
-		"psh": {'`': true},
-		"pwsh": {'`': true},
-		"cmd": {'^': true},
-		"sh": {'\\': true},
-		"bash": {'\\': true},
-		"python": {},
-	}[executor]
-
-	var buffer bytes.Buffer
 	parts := strings.Split(strings.TrimSpace(command), "\n")
-	for i := range parts {
-		part := strings.TrimSpace(buffer.String())
-		var terminal byte
-		if len(part) > 0 {
-			terminal = part[len(part)-1]
-		}
-		
-		if _, cont := continuations[terminal]; ((i == 0) || cont) {
-		    buffer.WriteString(parts[i])
-		} else {
-		 	buffer.WriteString(delimiter)
-		    buffer.WriteString(parts[i])
-		}
+	if len(parts) > 1 {
+		delimiter := map[string]string{
+			"psh":    ";",
+			"pwsh":   ";",
+			"cmd":    "&",
+			"sh":     ";",
+			"bash":   ";",
+			"python": ";",
+		}[executor]
+		return strings.Join(parts, delimiter)
 	}
-
-	return buffer.String()
+	return command
 }
