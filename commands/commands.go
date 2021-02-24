@@ -120,16 +120,32 @@ func splitMessage(message string, splitRune rune) []string {
 
 func convertCommand(executor string, command string) string {
 	parts := strings.Split(strings.TrimSpace(command), "\n")
-	if len(parts) > 1 {
-		delimiter := map[string]string{
-			"psh":    ";",
-			"pwsh":   ";",
-			"cmd":    "&",
-			"sh":     ";",
-			"bash":   ";",
-			"python": ";",
-		}[executor]
-		return strings.Join(parts, delimiter)
+	delimiters := map[string]string{
+		"psh":    ";",
+		"pwsh":   ";",
+		"cmd":    "&",
+		"sh":     ";",
+		"python": ";",
+	}
+	if delimiter, ok := delimiters[executor]; len(parts) > 1 && ok {
+		return splitAndTrim(parts, delimiter)
 	}
 	return command
+}
+
+func splitAndTrim(parts []string, delimiter string) string {
+	n := len(delimiter) * (len(parts) - 1)
+	for i := 0; i < len(parts); i++ {
+		n += len(parts[i])
+	}
+
+	var c strings.Builder
+	c.Grow(n)
+	c.WriteString(strings.TrimSuffix(parts[0], delimiter))
+	for _, p := range parts[1:] {
+		c.WriteString(delimiter)
+		c.WriteString(strings.TrimSuffix(p, delimiter))
+	}
+
+	return c.String()
 }
