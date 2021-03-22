@@ -1,6 +1,6 @@
 module github.com/preludeorg/pneuma
 
-go 1.15
+go 1.16
 
 require (
 	github.com/golang/protobuf v1.4.3
