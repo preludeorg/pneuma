@@ -6,4 +6,3 @@
 .idea
 compiled/*
 payloads/*
-go.sum
