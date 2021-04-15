@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var key = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
+var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
 func init() {
 	util.HideConsole()
@@ -41,6 +41,6 @@ func main() {
 	}
 	util.EncryptionKey = &agent.AESKey
 	sockets.UA = &agent.Useragent
-	util.DebugLogf("[%s] agent at PID %d using key %s", agent.Address, agent.Pid, key)
+	util.DebugLogf("[%s] agent at PID %d using hash randomizing string %s", agent.Address, agent.Pid, randomHash)
 	sockets.EventLoop(agent, agent.BuildBeacon())
 }
