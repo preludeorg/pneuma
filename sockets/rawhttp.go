@@ -6,13 +6,17 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/preludeorg/pneuma/util"
+	"github.com/rapid7/go-get-proxied/proxy"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
 )
 
-var UA *string
+var (
+	UA *string
+	proxyUsed proxy.Proxy
+)
 
 type HTTP struct {}
 
@@ -23,6 +27,7 @@ func init() {
 
 func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
 	checkValidHTTPTarget(agent.Address, true)
+	proxyUsed = checkProxyConfiguration(agent)
 	for {
 		refreshBeacon(agent, &beacon)
 		for agent.Contact == "http" {
@@ -77,7 +82,7 @@ func beaconPOST(address string, beacon util.Beacon) []byte {
 }
 
 func request(address string, method string, data []byte) ([]byte, http.Header, int, error) {
-	client := &http.Client{}
+	client := getClientType()
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 
 	if err != nil {
@@ -118,4 +123,20 @@ func request(address string, method string, data []byte) ([]byte, http.Header, i
 		return nil, nil, resp.StatusCode, err
 	}
 	return body, resp.Header, resp.StatusCode, err
+}
+
+func getClientType() *http.Client {
+	if proxyUsed != nil {
+		transport := &http.Transport{Proxy: http.ProxyURL(proxyUsed.URL())}
+		return &http.Client{Transport: transport}
+	}
+	return &http.Client{}
+}
+
+func checkProxyConfiguration(agent *util.AgentConfig) proxy.Proxy {
+	p := proxy.NewProvider("").GetHTTPProxy(agent.Address)
+	if p != nil {
+		return p
+	}
+	return nil
 }
