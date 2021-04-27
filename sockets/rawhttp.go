@@ -79,23 +79,41 @@ func beaconPOST(address string, beacon util.Beacon) []byte {
 func request(address string, method string, data []byte) ([]byte, http.Header, int, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
+
 	if err != nil {
 		util.DebugLog(err)
 	}
+	urlTest, err2 := http.ProxyFromEnvironment(req)
+
+	if urlTest != nil {
+		util.DebugLog("use proxy: " + urlTest.String())
+	} else {
+		util.DebugLog("not using proxy")
+	}
+
+	if err2 != nil {
+		util.DebugLog("fail on proxy selection")
+		util.DebugLog(err2)
+	}
+
 	req.Close = true
 	req.Header.Set("User-Agent", *UA)
 	resp, err := client.Do(req)
+	util.DebugLog(resp)
 	if err != nil {
+		util.DebugLog("failed on request do")
 		util.DebugLog(err)
 		return nil, nil, 404, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		util.DebugLog("failed on body read")
 		util.DebugLog(err)
 		return nil, nil, resp.StatusCode, err
 	}
 	err = resp.Body.Close()
 	if err != nil {
+		util.DebugLog("failed on body close")
 		util.DebugLog(err)
 		return nil, nil, resp.StatusCode, err
 	}
