@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/preludeorg/pneuma/commands/pty"
 	"github.com/preludeorg/pneuma/util"
 	"os"
 	"os/exec"
@@ -20,12 +21,16 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		return string(bites), 0, 0
 	} else if executor == "keyword" {
 		task := splitMessage(message, '.')
-		if task[0] == "config" {
+		switch task[0] {
+		case "config":
 			return updateConfiguration(task[1], agent)
-		} else if task[0] == "exit" {
+		case "shell":
+			return pty.SpawnShell(task[1], agent)
+		case "exit":
 			return shutdown(agent)
+		default:
+			return "Keyword selected not available for agent", 0, 0
 		}
-		return "Keyword selected not available for agent", 0, 0
 	} else {
 		util.DebugLogf("Running instruction")
 		bites, status, pid := execute(message, executor, agent)
