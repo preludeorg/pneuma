@@ -37,7 +37,7 @@ When you are ready to use Pneuma in a real environment, you will want to compile
 ./build.sh JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA
 ```
 
-One windows you can build with:
+On windows you can build with:
 
 ```powershell
 .\build.ps1 -randomHash "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
