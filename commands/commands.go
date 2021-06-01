@@ -77,11 +77,11 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 	command.SysProcAttr = getSysProcAttrs()
 	if out, err := command.Output(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			bites = exitError.Stderr
+			bites = append(out, exitError.Stderr...)
 			pid = exitError.Pid()
 			status = exitError.ProcessState.ExitCode()
 		} else {
-			bites = []byte(err.Error())
+			bites = append(out, []byte(err.Error())...)
 			pid = -1
 			status = command.ProcessState.ExitCode()
 		}
