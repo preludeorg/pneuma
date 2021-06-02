@@ -55,6 +55,8 @@ func execute(command string, executor string, agent *util.AgentConfig) ([]byte, 
 			bites, pid, status = execution(exec.CommandContext(ctx, "python", "-c", command))
 		} else if executor == "osa" && runtime.GOOS == "darwin" {
 			bites, pid, status = execution(exec.CommandContext(ctx, "osascript", "-e", command))
+		} else if executor == "bash"{
+			bites, pid, status = execution(exec.CommandContext(ctx, "bash", "-c", command))
 		} else {
 			bites, pid, status = execution(exec.CommandContext(ctx, "sh", "-c", command))
 		}
