@@ -23,7 +23,7 @@ func init() {
 }
 
 func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
-	checkValidHTTPTarget(agent.Address, true)
+	checkValidHTTPTarget(agent.Address)
 	for {
 		refreshBeacon(agent, &beacon)
 		for agent.Contact == "http" {
@@ -42,12 +42,9 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 	}
 }
 
-func checkValidHTTPTarget(address string, fatal bool) (bool, error) {
+func checkValidHTTPTarget(address string) (bool, error) {
 	u, err := url.Parse(address)
 	if err != nil || u.Scheme == "" || u.Host == "" {
-		if fatal {
-			util.DebugLogf("[%s] is an invalid URL for HTTP/S beacons", address)
-		}
 		util.DebugLogf("[%s] is an invalid URL for HTTP/S beacons", address)
 		return false, errors.New("INVALID URL")
 	}
@@ -55,7 +52,7 @@ func checkValidHTTPTarget(address string, fatal bool) (bool, error) {
 }
 
 func requestHTTPPayload(address string) ([]byte, string, int, error) {
-	valid, err := checkValidHTTPTarget(address, false)
+	valid, err := checkValidHTTPTarget(address)
 	if valid {
 		body, _, code, netErr := request(address, "GET", []byte{})
 		if netErr != nil {
