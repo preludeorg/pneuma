@@ -20,7 +20,7 @@ func init() {
 
 func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
 	for agent.Contact == "tcp" {
-		conn, err := net.Dial("tcp", agent.Address)
+		conn, err := dialTCPConnection(agent)
 	   	if err != nil {
 	   		util.DebugLogf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 	   	} else {
