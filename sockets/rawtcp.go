@@ -10,12 +10,9 @@ import (
 	"net"
 	"net/url"
 	"strings"
-	"sync"
 )
 
 type TCP struct {}
-
-var proxyOnce sync.Once
 
 func init() {
 	util.CommunicationChannels["tcp"] = TCP{}
