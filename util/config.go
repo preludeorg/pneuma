@@ -50,6 +50,7 @@ type AgentConfig struct {
 	KillSleep int
 	CommandTimeout int
 	Pid int
+	Proxy string
 	Executing map[string]Instruction
 }
 
@@ -89,6 +90,7 @@ func BuildAgentConfig() *AgentConfig {
 		KillSleep: 5,
 		CommandTimeout: 60,
 		Pid: os.Getpid(),
+		Proxy: "",
 		Executing: make(map[string]Instruction),
 	}
 }

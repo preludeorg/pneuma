@@ -19,13 +19,14 @@ type HTTP struct {}
 func init() {
 	util.CommunicationChannels["http"] = HTTP{}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	http.DefaultTransport.(*http.Transport).Proxy = http.ProxyFromEnvironment
 }
 
 func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
 	if _, err := checkValidHTTPTarget(agent.Address); err != nil {
 		return beacon, err
 	}
+
+	setHTTPProxyConfiguration(agent)
 
 	for {
 		refreshBeacon(agent, &beacon)
@@ -52,6 +53,18 @@ func checkValidHTTPTarget(address string) (bool, error) {
 		return false, errors.New("INVALID URL")
 	}
 	return true, nil
+}
+
+func setHTTPProxyConfiguration(agent *util.AgentConfig) {
+	var proxyUrlFunc func (*http.Request) (*url.URL, error)
+
+	if proxyUrl, err := url.Parse(agent.Proxy); err == nil && proxyUrl.Scheme != "" && proxyUrl.Host != "" {
+		proxyUrlFunc = http.ProxyURL(proxyUrl)
+	} else {
+		proxyUrlFunc = http.ProxyFromEnvironment
+	}
+
+	http.DefaultTransport.(*http.Transport).Proxy = proxyUrlFunc
 }
 
 func requestHTTPPayload(address string) ([]byte, string, int, error) {
