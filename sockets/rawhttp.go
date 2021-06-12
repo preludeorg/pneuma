@@ -19,6 +19,7 @@ type HTTP struct {}
 func init() {
 	util.CommunicationChannels["http"] = HTTP{}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	http.DefaultTransport.(*http.Transport).Proxy = http.ProxyFromEnvironment
 }
 
 func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
