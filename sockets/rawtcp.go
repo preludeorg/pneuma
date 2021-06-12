@@ -4,9 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/preludeorg/pneuma/util"
 	"io"
 	"net"
+	"net/url"
 	"strings"
 )
 
@@ -37,6 +39,28 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (uti
 	   	jitterSleep(agent.Sleep, "TCP")
 	}
 	return beacon, nil
+}
+
+func dialTCPConnection(agent *util.AgentConfig) (net.Conn, error) {
+	if agent.Proxy != "" {
+		if proxyUrl, err := url.Parse(agent.Proxy); err == nil && proxyUrl.Scheme != "" && proxyUrl.Host != "" {
+			return dialProxiedTCPConnection(proxyUrl, agent)
+		}
+	}
+	return net.Dial("tcp", agent.Address)
+}
+
+func dialProxiedTCPConnection(proxyUrl *url.URL, agent *util.AgentConfig) (net.Conn, error) {
+	conn, err := net.Dial("tcp", proxyUrl.Host)
+
+	if err != nil {
+		return conn, err
+	}
+
+	if _, err = fmt.Fprintf(conn, "CONNECT %s HTTP/1.1\r\n\r\n", agent.Address); err != nil {
+		util.DebugLogf("Error writing to proxy socket")
+	}
+	return conn, err
 }
 
 func respond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
