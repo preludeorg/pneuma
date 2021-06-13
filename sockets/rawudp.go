@@ -16,7 +16,7 @@ func init() {
 	util.CommunicationChannels["udp"] = UDP{}
 }
 
-func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
+func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
 	for agent.Contact == "udp" {
 		conn, err := net.Dial("udp", agent.Address)
 	   	if err != nil {
@@ -31,13 +31,13 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 				message := strings.TrimSpace(scanner.Text())
 				udpRespond(conn, beacon, message, agent)
 				if agent.Contact != "udp" {
-					return beacon
+					return beacon, nil
 				}
 			}
 	   	}
 	   	jitterSleep(agent.Sleep, "UDP")
 	}
-	return beacon
+	return beacon, nil
 }
 
 func udpRespond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
