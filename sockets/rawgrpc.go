@@ -16,7 +16,7 @@ func init() {
 	util.CommunicationChannels["grpc"] = GRPC{}
 }
 
-func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
+func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
 	for {
 		refreshBeacon(agent, &beacon)
 		for agent.Contact == "grpc" {
@@ -28,7 +28,7 @@ func (contact GRPC) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 			runLinks(&tempB, &beacon, agent, "")
 		}
 		if agent.Contact != "grpc" {
-			return beacon
+			return beacon, nil
 		}
 		beacon.Links = beacon.Links[:0]
 		jitterSleep(agent.Sleep, "GRPC")

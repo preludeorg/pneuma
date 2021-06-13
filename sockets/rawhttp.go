@@ -22,8 +22,11 @@ func init() {
 	http.DefaultTransport.(*http.Transport).Proxy = http.ProxyFromEnvironment
 }
 
-func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
-	checkValidHTTPTarget(agent.Address)
+func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
+	if _, err := checkValidHTTPTarget(agent.Address); err != nil {
+		return beacon, err
+	}
+
 	for {
 		refreshBeacon(agent, &beacon)
 		for agent.Contact == "http" {
@@ -35,7 +38,7 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) uti
 			runLinks(&tempB, &beacon, agent, "")
 		}
 		if agent.Contact != "http" {
-			return beacon
+			return beacon, nil
 		}
 		beacon.Links = beacon.Links[:0]
 		jitterSleep(agent.Sleep, "HTTP")

