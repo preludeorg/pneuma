@@ -3,6 +3,7 @@ package sockets
 import (
 	"bufio"
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/preludeorg/pneuma/util"
@@ -57,7 +58,11 @@ func dialProxiedTCPConnection(proxyUrl *url.URL, agent *util.AgentConfig) (net.C
 		return conn, err
 	}
 
-	if _, err = fmt.Fprintf(conn, "CONNECT %s HTTP/1.1\r\n\r\n", agent.Address); err != nil {
+	connectHeader := fmt.Sprintf("CONNECT %s HTTP/1.1\r\nHost: %s\r\n", agent.Address, agent.Address)
+	if proxyUrl.User.String() != "" {
+		connectHeader += fmt.Sprintf("Proxy-Authorization: basic %s\r\n", base64.StdEncoding.EncodeToString([]byte(proxyUrl.User.String())))
+	}
+	if _, err = fmt.Fprint(conn, connectHeader); err != nil {
 		util.DebugLogf("Error writing to proxy socket")
 	}
 	return conn, err
