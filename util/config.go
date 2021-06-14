@@ -50,6 +50,7 @@ type AgentConfig struct {
 	KillSleep int
 	CommandTimeout int
 	Pid int
+	Proxy string
 	Executing map[string]Instruction
 }
 
@@ -89,6 +90,7 @@ func BuildAgentConfig() *AgentConfig {
 		KillSleep: 5,
 		CommandTimeout: 60,
 		Pid: os.Getpid(),
+		Proxy: "",
 		Executing: make(map[string]Instruction),
 	}
 }
@@ -98,6 +100,7 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.AESKey = applyKey(c.AESKey, ac, "AESKey").([]byte)
 	c.Range = applyKey(c.Range, ac, "Range").(string)
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
+	c.Proxy = applyKey(c.Proxy, ac, "Proxy").(string)
 	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
 	if key, ok := ac["Contact"]; ok {
 		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
