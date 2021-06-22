@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/preludeorg/pneuma/sockets"
 	"github.com/preludeorg/pneuma/util"
 	"os"
@@ -21,6 +22,7 @@ func main() {
 	address := flag.String("address", agent.Address, "The ip:port of the socket listening post")
 	group := flag.String("range", agent.Range, "Which range to associate to")
 	sleep := flag.Int("sleep", agent.Sleep, "Number of seconds to sleep between beacons")
+	jitter := flag.Int("jitter", agent.Jitter, "Number of seconds to sleep between TTPs")
 	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting (HTTP/S only)")
 	proxy := flag.String("proxy", agent.Proxy, "Set a proxy URL target (HTTP/S only)")
 	util.DebugMode = flag.Bool("debug", false, "Write debug output to console")
@@ -32,8 +34,10 @@ func main() {
 		"Range": *group,
 		"Useragent": *useragent,
 		"Sleep": *sleep,
+		"Jitter": *jitter,
 		"Proxy": *proxy,
 	})
+	fmt.Println(*jitter)
 	if *util.DebugMode {
 		util.ShowConsole()
 	}
