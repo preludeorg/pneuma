@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/preludeorg/pneuma/sockets"
 	"github.com/preludeorg/pneuma/util"
 	"os"
@@ -37,7 +36,6 @@ func main() {
 		"Jitter": *jitter,
 		"Proxy": *proxy,
 	})
-	fmt.Println(*jitter)
 	if *util.DebugMode {
 		util.ShowConsole()
 	}
