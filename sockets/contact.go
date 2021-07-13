@@ -38,6 +38,7 @@ func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, 
 		}
 		beacon.Links = append(beacon.Links, link)
 		agent.EndInstruction(link)
+		jitterSleep(agent.CommandJitter, "JITTER")
 	}
 }
 
