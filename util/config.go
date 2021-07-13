@@ -90,7 +90,6 @@ func BuildAgentConfig() *AgentConfig {
 	agent.Name = pickName(12)
 	agent.Pid = os.Getpid()
 	agent.Executing = make(map[string]Instruction)
-	DebugMode = &agent.Debug
 	return &agent
 }
 
