@@ -203,9 +203,6 @@ func applyKey(curr interface{}, ac map[string]interface{}, key string) interface
 		if key == "Sleep" && reflect.TypeOf(val).Kind() == reflect.Float64 {
 			return int(reflect.ValueOf(val).Float())
 		}
-		if key == "AESKey" && reflect.TypeOf(val).Kind() == reflect.String{
-			return []byte(val.(string))
-		}
 		return val
 	}
 	return curr
