@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"crypto/md5"
+	"embed"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
@@ -16,6 +17,9 @@ import (
 	"strings"
 	"time"
 )
+
+//go:embed conf/default.json
+var defaultConfig embed.FS
 
 var DebugMode *bool
 
@@ -41,7 +45,7 @@ type Operation interface {
 
 type AgentConfig struct {
 	Name 	  string
-	AESKey    []byte
+	AESKey    string
 	Range     string
 	Contact   string
 	Address   string
@@ -51,6 +55,7 @@ type AgentConfig struct {
 	CommandTimeout int
 	Pid int
 	Proxy string
+	Debug bool
 	Executing map[string]Instruction
 }
 
@@ -79,25 +84,18 @@ type Instruction struct {
 }
 
 func BuildAgentConfig() *AgentConfig {
-	return &AgentConfig{
-		Name:      pickName(12),
-		AESKey:    []byte("abcdefghijklmnopqrstuvwxyz012345"),
-		Range:     "red",
-		Contact:   "tcp",
-		Address:   "127.0.0.1:2323",
-		Useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36",
-		Sleep:     60,
-		KillSleep: 5,
-		CommandTimeout: 60,
-		Pid: os.Getpid(),
-		Proxy: "",
-		Executing: make(map[string]Instruction),
-	}
+	var agent AgentConfig
+	data, _ := defaultConfig.ReadFile("conf/default.json")
+	json.Unmarshal(data, &agent)
+	agent.Name = pickName(12)
+	agent.Pid = os.Getpid()
+	agent.Executing = make(map[string]Instruction)
+	return &agent
 }
 
 func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Name = applyKey(c.Name, ac, "Name").(string)
-	c.AESKey = applyKey(c.AESKey, ac, "AESKey").([]byte)
+	c.AESKey = applyKey(c.AESKey, ac, "AESKey").(string)
 	c.Range = applyKey(c.Range, ac, "Range").(string)
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
 	c.Proxy = applyKey(c.Proxy, ac, "Proxy").(string)
@@ -204,9 +202,6 @@ func applyKey(curr interface{}, ac map[string]interface{}, key string) interface
 	if val, ok := ac[key]; ok {
 		if key == "Sleep" && reflect.TypeOf(val).Kind() == reflect.Float64 {
 			return int(reflect.ValueOf(val).Float())
-		}
-		if key == "AESKey" && reflect.TypeOf(val).Kind() == reflect.String{
-			return []byte(val.(string))
 		}
 		return val
 	}

@@ -11,7 +11,7 @@ import (
 	"io"
 )
 
-var EncryptionKey *[]byte
+var EncryptionKey *string
 
 //Encrypt the results
 func Encrypt(bites []byte) []byte {
@@ -20,7 +20,7 @@ func Encrypt(bites []byte) []byte {
 		DebugLog(err)
 		return make([]byte, 0)
 	}
-	block, _ := aes.NewCipher(*EncryptionKey)
+	block, _ := aes.NewCipher([]byte(*EncryptionKey))
 	cipherText := make([]byte, aes.BlockSize+len(plainText))
 	iv := cipherText[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
@@ -34,7 +34,7 @@ func Encrypt(bites []byte) []byte {
 //Decrypt a command
 func Decrypt(text string) string {
 	cipherText, _ := hex.DecodeString(text)
-	block, err := aes.NewCipher(*EncryptionKey)
+	block, err := aes.NewCipher([]byte(*EncryptionKey))
 	if err != nil {
 		DebugLog(err)
 		return ""

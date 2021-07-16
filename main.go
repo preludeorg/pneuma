@@ -23,7 +23,7 @@ func main() {
 	sleep := flag.Int("sleep", agent.Sleep, "Number of seconds to sleep between beacons")
 	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting (HTTP/S only)")
 	proxy := flag.String("proxy", agent.Proxy, "Set a proxy URL target (HTTP/S only)")
-	util.DebugMode = flag.Bool("debug", false, "Write debug output to console")
+	util.DebugMode = flag.Bool("debug", agent.Debug, "Write debug output to console")
 	flag.Parse()
 	agent.SetAgentConfig(map[string]interface{}{
 		"Name": *name,
