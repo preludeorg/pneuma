@@ -38,12 +38,9 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 }
 
 func execute(command string, executor string, agent *util.AgentConfig) ([]byte, int, int) {
-	var bites []byte
-	var pid int
-	var status int
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout) * time.Second)
 	defer cancel()
-	bites, pid, status = execution(getShellCommand(ctx, executor, command))
+	bites, pid, status := execution(getShellCommand(ctx, executor, command))
 	if ctx.Err() == context.DeadlineExceeded {
 		bites = []byte("Command timed out.")
 	}
