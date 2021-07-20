@@ -15,11 +15,8 @@ import (
 
 //RunCommand executes a given command
 func RunCommand(message string, executor string, payloadPath string, agent *util.AgentConfig) (string, int, int) {
-	if strings.HasPrefix(message, "cd") {
-		pieces := strings.Split(message, "cd")
-		bites := changeDirectory(pieces[1])
-		return string(bites), 0, 0
-	} else if executor == "keyword" {
+	switch executor {
+	case "keyword":
 		task := splitMessage(message, '.')
 		switch task[0] {
 		case "config":
@@ -31,7 +28,7 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		default:
 			return "Keyword selected not available for agent", 0, 0
 		}
-	} else {
+	default:
 		util.DebugLogf("Running instruction")
 		bites, status, pid := execute(message, executor, agent)
 		return string(bites), status, pid
@@ -65,11 +62,6 @@ func execute(command string, executor string, agent *util.AgentConfig) ([]byte, 
 		bites = []byte("Command timed out.")
 	}
 	return []byte(fmt.Sprintf("%s%s", bites, "\n")), status, pid
-}
-
-func changeDirectory(target string) []byte {
-	os.Chdir(strings.TrimSpace(target))
-	return []byte(" ")
 }
 
 func execution(command *exec.Cmd) ([]byte, int, int){
