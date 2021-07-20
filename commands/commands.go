@@ -12,11 +12,6 @@ import (
 	"time"
 )
 
-const (
-	ErrorExitStatus   = -1
-	SuccessExitStatus = 0
-)
-
 //RunCommand executes a given command
 func RunCommand(message string, executor string, payloadPath string, agent *util.AgentConfig) (string, int, int) {
 	switch executor {
@@ -30,7 +25,7 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		case "exit":
 			return shutdown(agent)
 		default:
-			return "Keyword selected not available for agent", ErrorExitStatus, ErrorExitStatus
+			return "Keyword selected not available for agent", util.ErrorExitStatus, util.ErrorExitStatus
 		}
 	default:
 		util.DebugLogf("Running instruction")
@@ -55,7 +50,7 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 		if exitError, ok := err.(*exec.ExitError); ok {
 			return append(out, exitError.Stderr...), exitError.Pid(), exitError.ProcessState.ExitCode()
 		}
-		return append(out, []byte(err.Error())...), ErrorExitStatus, command.ProcessState.ExitCode()
+		return append(out, []byte(err.Error())...), util.ErrorExitStatus, command.ProcessState.ExitCode()
 	}
 	return out, command.ProcessState.Pid(), command.ProcessState.ExitCode()
 }
@@ -65,7 +60,7 @@ func updateConfiguration(config string, agent *util.AgentConfig) (string, int, i
 	err := json.Unmarshal([]byte(config), &newConfig)
 	if err == nil {
 		agent.SetAgentConfig(newConfig)
-		return "Successfully updated agent configuration.", SuccessExitStatus, os.Getpid()
+		return "Successfully updated agent configuration.", util.SuccessExitStatus, os.Getpid()
 	}
 	return err.Error(), 1, os.Getpid()
 }
@@ -73,9 +68,9 @@ func updateConfiguration(config string, agent *util.AgentConfig) (string, int, i
 func shutdown(agent *util.AgentConfig) (string, int, int) {
 	go func(a *util.AgentConfig) {
 		time.Sleep(time.Duration(a.KillSleep) * time.Second)
-		os.Exit(SuccessExitStatus)
+		os.Exit(util.SuccessExitStatus)
 	}(agent)
-	return fmt.Sprintf("Exiting agent in %d seconds", agent.KillSleep), SuccessExitStatus, os.Getpid()
+	return fmt.Sprintf("Exiting agent in %d seconds", agent.KillSleep), util.SuccessExitStatus, os.Getpid()
 }
 
 func splitMessage(message string, splitRune rune) []string {
