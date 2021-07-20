@@ -18,6 +18,11 @@ import (
 	"time"
 )
 
+const (
+	ErrorExitStatus   = -1
+	SuccessExitStatus = 0
+)
+
 //go:embed conf/default.json
 var defaultConfig embed.FS
 

