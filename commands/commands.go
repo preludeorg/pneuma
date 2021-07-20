@@ -45,25 +45,14 @@ func execute(command string, executor string, agent *util.AgentConfig) ([]byte, 
 }
 
 func execution(command *exec.Cmd) ([]byte, int, int){
-	var bites []byte
-	var status int
-	var pid int
-	if out, err := command.Output(); err != nil {
+	out, err := command.Output()
+	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			bites = append(out, exitError.Stderr...)
-			pid = exitError.Pid()
-			status = exitError.ProcessState.ExitCode()
-		} else {
-			bites = append(out, []byte(err.Error())...)
-			pid = -1
-			status = command.ProcessState.ExitCode()
+			return append(out, exitError.Stderr...), exitError.Pid(), exitError.ProcessState.ExitCode()
 		}
-	} else {
-		bites = out
-		pid = command.ProcessState.Pid()
-		status = command.ProcessState.ExitCode()
+		return append(out, []byte(err.Error())...), -1, command.ProcessState.ExitCode()
 	}
-	return bites, pid, status
+	return out, command.ProcessState.Pid(), command.ProcessState.ExitCode()
 }
 
 func updateConfiguration(config string, agent *util.AgentConfig) (string, int, int) {
