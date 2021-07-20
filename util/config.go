@@ -52,6 +52,7 @@ type AgentConfig struct {
 	Useragent string
 	Sleep     int
 	KillSleep int
+	CommandJitter int
 	CommandTimeout int
 	Pid int
 	Proxy string
@@ -100,6 +101,7 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
 	c.Proxy = applyKey(c.Proxy, ac, "Proxy").(string)
 	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
+	c.Sleep = applyKey(c.Sleep, ac, "CommandJitter").(int)
 	if key, ok := ac["Contact"]; ok {
 		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
 			c.Contact = strings.ToLower(key.(string))
