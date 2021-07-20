@@ -8,7 +8,6 @@ import (
 	"github.com/preludeorg/pneuma/util"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -39,28 +38,9 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 }
 
 func execute(command string, executor string, agent *util.AgentConfig) ([]byte, int, int) {
-	var bites []byte
-	var pid int
-	var status int
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout) * time.Second)
 	defer cancel()
-	if runtime.GOOS == "windows" {
-		if executor == "cmd" {
-			bites, pid, status = execution(exec.CommandContext(ctx, "cmd.exe", "/c", command))
-		} else {
-			bites, pid, status = execution(exec.CommandContext(ctx, "powershell.exe", "-ExecutionPolicy", "Bypass", "-C", command))
-		}
-	} else {
-		if executor == "python" {
-			bites, pid, status = execution(exec.CommandContext(ctx, "python", "-c", command))
-		} else if executor == "osa" && runtime.GOOS == "darwin" {
-			bites, pid, status = execution(exec.CommandContext(ctx, "osascript", "-e", command))
-		} else if executor == "bash"{
-			bites, pid, status = execution(exec.CommandContext(ctx, "bash", "-c", command))
-		} else {
-			bites, pid, status = execution(exec.CommandContext(ctx, "sh", "-c", command))
-		}
-	}
+	bites, pid, status := execution(getShellCommand(ctx, executor, command))
 	if ctx.Err() == context.DeadlineExceeded {
 		bites = []byte("Command timed out.")
 	}
@@ -76,7 +56,6 @@ func execution(command *exec.Cmd) ([]byte, int, int){
 	var bites []byte
 	var status int
 	var pid int
-	command.SysProcAttr = getSysProcAttrs()
 	if out, err := command.Output(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			bites = append(out, exitError.Stderr...)
