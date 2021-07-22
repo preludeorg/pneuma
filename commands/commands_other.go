@@ -23,6 +23,8 @@ func getShellCommand(ctx context.Context, executor, command string) *exec.Cmd {
 		cmd = exec.CommandContext(ctx, "osascript", "-e", command)
 	case "bash":
 		cmd = exec.CommandContext(ctx, "bash", "-c", command)
+	case "zsh":
+		cmd = exec.CommandContext(ctx, "zsh", "-c", command)
 	default:
 		cmd = exec.CommandContext(ctx, "sh", "-c", command)
 	}
