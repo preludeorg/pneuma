@@ -23,6 +23,7 @@ func EventLoop(agent *util.AgentConfig, beacon util.Beacon) {
 
 func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, delimiter string) {
 	for _, link := range agent.StartInstructions(tempB.Links) {
+		jitterSleep(agent.CommandJitter, "JITTER")
 		var payloadPath string
 		var payloadErr error
 		if len(link.Payload) > 0 {
@@ -38,7 +39,6 @@ func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, 
 		}
 		beacon.Links = append(beacon.Links, link)
 		agent.EndInstruction(link)
-		jitterSleep(agent.CommandJitter, "JITTER")
 	}
 }
 
@@ -85,6 +85,11 @@ func jitterSleep(sleep int, beaconType string) {
 	min := int(float64(sleep) * .90)
 	max := int(float64(sleep) * 1.10)
 	randomSleep := rand.Intn(max - min + 1) + min
-	util.DebugLogf("[%s] Next beacon going out in %d seconds", beaconType, randomSleep)
+	switch beaconType {
+	case "JITTER":
+		util.DebugLogf("[%s] Sleeping %d seconds before next TTP", beaconType, randomSleep)
+	default:
+		util.DebugLogf("[%s] Next beacon going out in %d seconds", beaconType, randomSleep)
+	}
 	time.Sleep(time.Duration(randomSleep) * time.Second)
 }
