@@ -26,7 +26,11 @@ const (
 //go:embed conf/default.json
 var defaultConfig embed.FS
 
-var DebugMode *bool
+var (
+	DebugMode *bool
+	_ = reflect.TypeOf(AgentConfig{})
+	_ = reflect.TypeOf(Beacon{})
+)
 
 //CommunicationChannels contains the contact implementations
 var CommunicationChannels = map[string]Contact{}
