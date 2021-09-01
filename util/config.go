@@ -110,7 +110,7 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
 	c.Proxy = applyKey(c.Proxy, ac, "Proxy").(string)
 	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
-	c.Sleep = applyKey(c.Sleep, ac, "CommandJitter").(int)
+	c.CommandJitter = applyKey(c.CommandJitter, ac, "CommandJitter").(int)
 	if key, ok := ac["Contact"]; ok {
 		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
 			c.Contact = strings.ToLower(key.(string))
