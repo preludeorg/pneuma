@@ -31,8 +31,8 @@ func DetermineExecutors(platform string, arch string) []string {
 			"executor": {"python", "pwsh", "sh", "bash"},
 		},
 		"darwin": {
-			"file": {"python3", "pwsh", "zsh", "sh", "osascript", "bash"},
-			"executor": {"python", "pwsh", "zsh", "sh", "osa", "bash"},
+			"file": {"python3", "pwsh", "zsh", "sh", "osascript", "osascript", "bash"},
+			"executor": {"python", "pwsh", "zsh", "sh", "applescript", "jxa", "bash"},
 		},
 	}
 	var executors []string
