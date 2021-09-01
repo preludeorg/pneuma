@@ -43,6 +43,20 @@ On windows you can build with:
 .\build.ps1 -randomHash "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 ```
 
+There is also support for garble builds (Thanks to the amazing work here: https://github.com/burrowers/garble):
+
+```shell
+GO111MODULE=on go get mvdan.cc/garble
+go mod tidy
+./garble-build.sh JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA
+```
+
+```powershell
+GO111MODULE=on go get mvdan.cc/garble
+go mod tidy
+.\garble-build.ps1 -randomHash "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
+```
+
 This will output a file (into the payloads directory) for each supported operating system, which you can copy to any target system and execute normally
 to start the agent. 
 
