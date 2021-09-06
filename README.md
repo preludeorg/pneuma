@@ -12,7 +12,7 @@ Clone this repository. Then ensure GoLang 1.16+ is installed before continuing.
 
 To use the agent, install GoLang then start the agent against whichever protocol you want:
 
-> If using a precompiled version, replace 'go run main.go' with './pneuma.exe' in the below commands, replacing pneuma.exe with the name of your downloaded file.
+> If using a precompiled version, replace 'go run main.go' with './pneuma-windows.exe' in the below commands, replacing pneuma.exe with the name of your downloaded file.
 
 ```
 go run main.go -contact tcp -address 127.0.0.1:2323
