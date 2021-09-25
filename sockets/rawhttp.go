@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"time"
 )
 
 var UA *string
@@ -91,7 +92,9 @@ func beaconPOST(address string, beacon util.Beacon) []byte {
 }
 
 func request(address string, method string, data []byte) ([]byte, http.Header, int, error) {
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Second * 20,
+	}
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 	if err != nil {
 		util.DebugLog(err)
