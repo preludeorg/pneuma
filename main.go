@@ -22,6 +22,7 @@ func main() {
 	group := flag.String("range", agent.Range, "Which range to associate to")
 	sleep := flag.Int("sleep", agent.Sleep, "Number of seconds to sleep between beacons")
 	jitter := flag.Int("jitter", agent.CommandJitter, "Number of seconds to sleep between beacons")
+	timeout := flag.Int("timeout", agent.CommandTimeout, "Number of seconds to wait until a command execution times out")
 	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting (HTTP/S only)")
 	proxy := flag.String("proxy", agent.Proxy, "Set a proxy URL target (HTTP/S only)")
 	util.DebugMode = flag.Bool("debug", agent.Debug, "Write debug output to console")
@@ -35,6 +36,7 @@ func main() {
 		"Sleep": *sleep,
 		"Proxy": *proxy,
 		"CommandJitter": *jitter,
+		"Timeout": *timeout,
 	})
 	if *util.DebugMode {
 		util.ShowConsole()
