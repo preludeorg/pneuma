@@ -36,7 +36,7 @@ func main() {
 		"Sleep": *sleep,
 		"Proxy": *proxy,
 		"CommandJitter": *jitter,
-		"Timeout": *timeout,
+		"CommandTimeout": *timeout,
 	})
 	if *util.DebugMode {
 		util.ShowConsole()
