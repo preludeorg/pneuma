@@ -37,12 +37,12 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (ut
 			if err := json.Unmarshal(body, &tempB); err != nil || len(tempB.Links) == 0 {
 				break
 			}
+			beacon.Links = beacon.Links[:0]
 			runLinks(&tempB, &beacon, agent, "")
 		}
 		if agent.Contact != "http" {
 			return beacon, nil
 		}
-		beacon.Links = beacon.Links[:0]
 		jitterSleep(agent.Sleep, "HTTP")
 	}
 }
