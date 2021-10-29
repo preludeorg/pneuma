@@ -96,7 +96,7 @@ apt-get install mingw64-gcc
 # Follow the instructions here: https://github.com/tpoechtrager/osxcross
 ```
 
-Default exported functions:
+You can modify the exported functions by modifying the names of the functions in the `library/library.go` file. Default exported functions:
 ```go
 //export VoidFunc
 func VoidFunc()

