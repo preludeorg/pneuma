@@ -65,6 +65,55 @@ to start the agent.
 > and must match the encryption key in the Prelude Operator Emulate section. Also consider
 > changing the default address parameters in main.go, so you can start your agent without command-line arguments.
 
+## C-Shared library compilation (DLL, SO, DyLib)
+
+Pneuma supports cross compilation to 64-bit C-shared libraries depending upon the platform you are building on. When using a C-Shared library,
+you must specifically compile in the parameters you want to configure in the `util/conf/default.json` file (specifically the `address`
+and the `contact` you wish you use).
+
+We currently support:
+
+* **Windows**: `build.ps1` and `garble-build.ps1` builds DLL
+* **Darwin**: `build.sh` and `garble-build.sh` builds DLL, Dylib, SO
+  * Depends on `x86_64-w64-mingw32-gcc` (Windows) and `x86_64-linux-musl-gcc` (Linux)
+* **Linux**: `build.sh` and `garble-build.sh` builds DLL, Dylib, SO
+  * Depends on `x86_64-w64-mingw32-gcc` (Windows) and `o64-clang` (Darwin)
+
+To install dependencies on Darwin:
+```shell
+brew install mingw-w64 FiloSottile/musl-cross/musl-cross
+```
+
+To install dependencies on Linux:
+```shell
+# yum repos for Windows builds
+yum install mingw64-gcc
+
+# apt repos for Windows builds
+apt-get install mingw64-gcc
+
+# Darwin builds
+# Follow the instructions here: https://github.com/tpoechtrager/osxcross
+```
+
+You can modify the exported functions by modifying the names of the functions in the `library/library.go` file. Default exported functions:
+```go
+//export VoidFunc
+func VoidFunc()
+
+//export RunAgent
+func RunAgent()
+
+//export DllInstall
+func DllInstall()
+
+//export DllRegisterServer
+func DllRegisterServer()
+
+//export DllUnregisterServer
+func DllUnregisterServer()
+```
+
 ## Use without Operator
 
 While Pneuma is designed to work with Prelude Operator, as an open-source agent you can point it against any command-and-control (C2) listening post you want. To do this, follow these instructions:
