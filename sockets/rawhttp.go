@@ -33,11 +33,11 @@ func (contact HTTP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (ut
 		refreshBeacon(agent, &beacon)
 		for agent.Contact == "http" {
 			body := beaconPOST(agent.Address, beacon)
+			beacon.Links = beacon.Links[:0]
 			var tempB util.Beacon
 			if err := json.Unmarshal(body, &tempB); err != nil || len(tempB.Links) == 0 {
 				break
 			}
-			beacon.Links = beacon.Links[:0]
 			runLinks(&tempB, &beacon, agent, "")
 		}
 		if agent.Contact != "http" {
