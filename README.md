@@ -1,6 +1,6 @@
 # Pneuma
 
-Pneuma is a cross-compiled [Operator](https://prelude.org) agent which can communicate over all available listening post protocols, currently gRPC, TCP, UDP and HTTP.
+Pneuma is a cross-compiled [Operator](https://www.prelude.org) agent which can communicate over all available listening post protocols, currently gRPC, TCP, UDP and HTTP.
 
 > This repo is for those who feel comfortable working with the inner workings of a Remote Access Trojan (RAT). If you simply need a copy of the Pneuma agent, there are precompiled versions available for [MacOS](https://s3.amazonaws.com/operator.payloads.open/payloads/pneuma/pneuma-darwin), [Windows](https://s3.amazonaws.com/operator.payloads.open/payloads/pneuma/pneuma-windows.exe) and [Linux](https://s3.amazonaws.com/operator.payloads.open/payloads/pneuma/pneuma-linux). You will need to mark these as executable after downloading.
 
