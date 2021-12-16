@@ -2,9 +2,9 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"syscall"
-	"fmt"
 )
 
 func getSysProcAttrs() *syscall.SysProcAttr {
@@ -13,10 +13,11 @@ func getSysProcAttrs() *syscall.SysProcAttr {
 	}
 }
 
-
 func getShellCommand(ctx context.Context, executor, command string) *exec.Cmd {
 	var cmd *exec.Cmd
 	switch executor {
+	case "python":
+		cmd = exec.CommandContext(ctx, "python", "-c", command)
 	case "cmd":
 		cmd = exec.CommandContext(ctx, "cmd.exe")
 		cmd.SysProcAttr = getSysProcAttrs()
