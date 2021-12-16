@@ -21,17 +21,17 @@ func (l *ListFlags) Set(value string) error {
 
 //DetermineExecutors looks for available execution engines
 func DetermineExecutors(platform string, arch string) []string {
-	platformExecutors := map[string]map[string][]string {
+	platformExecutors := map[string]map[string][]string{
 		"windows": {
-			"file": {"pwsh.exe", "powershell.exe", "cmd.exe"},
-			"executor": {"pwsh", "psh", "cmd"},
+			"file":     {"python.exe", "pwsh.exe", "powershell.exe", "cmd.exe"},
+			"executor": {"python", "pwsh", "psh", "cmd"},
 		},
 		"linux": {
-			"file": {"python3", "pwsh", "sh", "bash"},
+			"file":     {"python3", "pwsh", "sh", "bash"},
 			"executor": {"python", "pwsh", "sh", "bash"},
 		},
 		"darwin": {
-			"file": {"python3", "pwsh", "zsh", "sh", "osascript", "osascript", "bash"},
+			"file":     {"python3", "pwsh", "zsh", "sh", "osascript", "osascript", "bash"},
 			"executor": {"python", "pwsh", "zsh", "sh", "applescript", "jxa", "bash"},
 		},
 	}
