@@ -1,4 +1,5 @@
-//+build !windows,!js,!darwin
+//go:build !windows && !js && !darwin
+// +build !windows,!js,!darwin
 
 package commands
 
@@ -18,7 +19,7 @@ func getShellCommand(ctx context.Context, executor, command string) *exec.Cmd {
 	var cmd *exec.Cmd
 	switch executor {
 	case "python":
-		cmd = exec.CommandContext(ctx, "python", "-c", command)
+		cmd = exec.CommandContext(ctx, "python3", "-c", command)
 	case "bash":
 		cmd = exec.CommandContext(ctx, "bash", "-c", command)
 	case "zsh":
