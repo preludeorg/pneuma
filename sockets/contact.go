@@ -48,6 +48,7 @@ func refreshBeacon(agent *util.AgentConfig, beacon *util.Beacon) {
 	beacon.Range = agent.Range
 	beacon.Pwd = pwd
 	beacon.Target = agent.Address
+	beacon.Executors = agent.Executors
 	beacon.Executing = agent.BuildExecutingHash()
 }
 
@@ -84,7 +85,7 @@ func jitterSleep(sleep int, beaconType string) {
 	rand.Seed(time.Now().UnixNano())
 	min := int(float64(sleep) * .90)
 	max := int(float64(sleep) * 1.10)
-	randomSleep := rand.Intn(max - min + 1) + min
+	randomSleep := rand.Intn(max-min+1) + min
 	switch beaconType {
 	case "JITTER":
 		util.DebugLogf("[%s] Sleeping %d seconds before next TTP", beaconType, randomSleep)
