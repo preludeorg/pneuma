@@ -28,8 +28,8 @@ var defaultConfig embed.FS
 
 var (
 	DebugMode *bool
-	_ = reflect.TypeOf(AgentConfig{})
-	_ = reflect.TypeOf(Beacon{})
+	_         = reflect.TypeOf(AgentConfig{})
+	_         = reflect.TypeOf(Beacon{})
 )
 
 //CommunicationChannels contains the contact implementations
@@ -53,44 +53,45 @@ type Operation interface {
 }
 
 type AgentConfig struct {
-	Name 	  string
-	AESKey    string
-	Range     string
-	Contact   string
-	Address   string
-	Useragent string
-	Sleep     int
-	KillSleep int
-	CommandJitter int
+	Name           string
+	AESKey         string
+	Range          string
+	Contact        string
+	Address        string
+	Useragent      string
+	Sleep          int
+	KillSleep      int
+	CommandJitter  int
 	CommandTimeout int
-	Pid int
-	Proxy string
-	Debug bool
-	Executing map[string]Instruction
+	Pid            int
+	Proxy          string
+	Debug          bool
+	Executing      map[string]Instruction
+	Executors      []string
 }
 
 type Beacon struct {
-	Name string
-	Target string
-	Hostname string
-	Location string
-	Platform string
+	Name      string
+	Target    string
+	Hostname  string
+	Location  string
+	Platform  string
 	Executors []string
-	Range string
-	Sleep int
-	Pwd string
+	Range     string
+	Sleep     int
+	Pwd       string
 	Executing string
-	Links []Instruction
+	Links     []Instruction
 }
 
 type Instruction struct {
-	ID string `json:"ID"`
+	ID       string `json:"ID"`
 	Executor string `json:"Executor"`
-	Payload string `json:"Payload"`
-	Request string `json:"Request"`
+	Payload  string `json:"Payload"`
+	Request  string `json:"Request"`
 	Response string
-	Status int
-	Pid int
+	Status   int
+	Pid      int
 }
 
 func BuildAgentConfig() *AgentConfig {
@@ -99,6 +100,7 @@ func BuildAgentConfig() *AgentConfig {
 	json.Unmarshal(data, &agent)
 	agent.Name = pickName(12)
 	agent.Pid = os.Getpid()
+	agent.Executors = DetermineExecutors(runtime.GOOS, runtime.GOARCH)
 	agent.Executing = make(map[string]Instruction)
 	return &agent
 }
@@ -117,6 +119,9 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 			c.Contact = strings.ToLower(key.(string))
 			c.Address = applyKey(c.Address, ac, "Address").(string)
 		}
+	}
+	if _, ok := ac["RefreshExecutors"]; ok {
+		c.Executors = DetermineExecutors(runtime.GOOS, runtime.GOARCH)
 	}
 }
 
@@ -161,16 +166,16 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
 	hostname, _ := os.Hostname()
-	return Beacon {
+	return Beacon{
 		Name:      c.Name,
-		Target:	   c.Address,
+		Target:    c.Address,
 		Hostname:  hostname,
 		Range:     c.Range,
-		Sleep:	   c.Sleep,
+		Sleep:     c.Sleep,
 		Pwd:       pwd,
 		Location:  executable,
 		Platform:  runtime.GOOS,
-		Executors: DetermineExecutors(runtime.GOOS, runtime.GOARCH),
+		Executors: c.Executors,
 		Executing: "",
 		Links:     make([]Instruction, 0),
 	}
