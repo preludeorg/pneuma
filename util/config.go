@@ -106,18 +106,18 @@ func BuildAgentConfig() *AgentConfig {
 }
 
 func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
-	c.Name = applyKey(c.Name, ac, "Name").(string)
-	c.AESKey = applyKey(c.AESKey, ac, "AESKey").(string)
-	c.Range = applyKey(c.Range, ac, "Range").(string)
-	c.Useragent = applyKey(c.Useragent, ac, "Useragent").(string)
-	c.Proxy = applyKey(c.Proxy, ac, "Proxy").(string)
-	c.Sleep = applyKey(c.Sleep, ac, "Sleep").(int)
-	c.CommandJitter = applyKey(c.CommandJitter, ac, "CommandJitter").(int)
-	c.CommandTimeout = applyKey(c.CommandTimeout, ac, "CommandTimeout").(int)
+	c.Name = ApplyKey(c.Name, ac, "Name").(string)
+	c.AESKey = ApplyKey(c.AESKey, ac, "AESKey").(string)
+	c.Range = ApplyKey(c.Range, ac, "Range").(string)
+	c.Useragent = ApplyKey(c.Useragent, ac, "Useragent").(string)
+	c.Proxy = ApplyKey(c.Proxy, ac, "Proxy").(string)
+	c.Sleep = ApplyKey(c.Sleep, ac, "Sleep").(int)
+	c.CommandJitter = ApplyKey(c.CommandJitter, ac, "CommandJitter").(int)
+	c.CommandTimeout = ApplyKey(c.CommandTimeout, ac, "CommandTimeout").(int)
 	if key, ok := ac["Contact"]; ok {
 		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
 			c.Contact = strings.ToLower(key.(string))
-			c.Address = applyKey(c.Address, ac, "Address").(string)
+			c.Address = ApplyKey(c.Address, ac, "Address").(string)
 		}
 	}
 	if _, ok := ac["RefreshExecutors"]; ok {
@@ -215,7 +215,7 @@ func DebugLog(v ...interface{}) {
 	}
 }
 
-func applyKey(curr interface{}, ac map[string]interface{}, key string) interface{} {
+func ApplyKey(curr interface{}, ac map[string]interface{}, key string) interface{} {
 	if val, ok := ac[key]; ok {
 		if key == "Sleep" && reflect.TypeOf(val).Kind() == reflect.Float64 {
 			return int(reflect.ValueOf(val).Float())
