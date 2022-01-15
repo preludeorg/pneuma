@@ -27,28 +27,3 @@ func start() {
 	util.DebugLogf("[%s] agent at PID %d using hash randomizing string %s", agent.Address, agent.Pid, randomHash)
 	sockets.EventLoop(agent, agent.BuildBeacon())
 }
-
-//export VoidFunc
-func VoidFunc() {
-	start()
-}
-
-//export RunAgent
-func RunAgent()  {
-	start()
-}
-
-//export DllInstall
-func DllInstall() {
-	start()
-}
-
-//export DllRegisterServer
-func DllRegisterServer() {
-	start()
-}
-
-//export DllUnregisterServer
-func DllUnregisterServer() {
-	start()
-}
