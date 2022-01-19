@@ -71,7 +71,7 @@ func setHTTPProxyConfiguration(agent *util.AgentConfig) {
 func requestHTTPPayload(address string) ([]byte, string, int, error) {
 	valid, err := checkValidHTTPTarget(address)
 	if valid {
-		body, _, code, netErr := request(address, "GET", []byte{}, 60)
+		body, _, code, netErr := request(address, "GET", []byte{}, 1800)
 		if netErr != nil {
 			return nil, "", code, netErr
 		}
