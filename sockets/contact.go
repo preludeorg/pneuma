@@ -75,6 +75,8 @@ func requestPayload(target string) (string, error) {
 			return "", err
 		}
 		return payloadPath, nil
+	case 404:
+		return "", errors.New(fmt.Sprintf("[HTTP %d] Payload not found: %s", code, target))
 	default:
 		return "", errors.New(fmt.Sprintf("UNHANDLED PAYLOAD EXCEPTION: HTTP [%d]", code))
 	}
