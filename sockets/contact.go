@@ -57,9 +57,8 @@ func refreshBeacon(agent *util.AgentConfig, beacon *util.Beacon) {
 }
 
 func requestPayload(target string) (string, error) {
-	workingDir := "./"
 	filename := path.Base(target)
-	payloadPath := filepath.Join(workingDir, filename)
+	payloadPath := filepath.Join("./", filename)
 	body, code, err := requestHTTPPayload(target, payloadHash(payloadPath))
 	if err != nil {
 		return "", err
