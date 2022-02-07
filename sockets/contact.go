@@ -57,15 +57,16 @@ func refreshBeacon(agent *util.AgentConfig, beacon *util.Beacon) {
 }
 
 func requestPayload(target string) (string, error) {
+	wd, _ := os.Getwd()
 	filename := path.Base(target)
-	payloadPath := filepath.Join("./", filename)
+	payloadPath := filepath.Join(wd, filename)
 	body, code, err := requestHTTPPayload(target, payloadHash(payloadPath))
 	if err != nil {
 		return "", err
 	}
 	switch code {
 	case 204:
-		return target, nil
+		return payloadPath, nil
 	case 200:
 		if err = util.SaveFile(bytes.NewReader(body), payloadPath); err != nil {
 			return "", err
