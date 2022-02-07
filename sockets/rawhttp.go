@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"path"
 	"time"
 )
 
@@ -68,18 +67,13 @@ func setHTTPProxyConfiguration(agent *util.AgentConfig) {
 	http.DefaultTransport.(*http.Transport).Proxy = proxyUrlFunc
 }
 
-func requestHTTPPayload(address string) ([]byte, string, int, error) {
+func requestHTTPPayload(address string, filehash string) ([]byte, int, error) {
 	valid, err := checkValidHTTPTarget(address)
 	if valid {
-		body, _, code, netErr := request(address, "GET", []byte{}, 1800)
-		if netErr != nil {
-			return nil, "", code, netErr
-		}
-		if code == 200 {
-			return body, path.Base(address), code, netErr
-		}
+		body, _, code, netErr := requestWithHeaders(address, "GET", []byte{}, 1800, map[string]string{"existing": filehash})
+		return body, code, netErr
 	}
-	return nil, "", 0, err
+	return nil, 0, err
 }
 
 func beaconPOST(address string, beacon util.Beacon) []byte {
@@ -92,6 +86,10 @@ func beaconPOST(address string, beacon util.Beacon) []byte {
 }
 
 func request(address string, method string, data []byte, timeout time.Duration) ([]byte, http.Header, int, error) {
+	return requestWithHeaders(address, method, data, timeout, map[string]string{})
+}
+
+func requestWithHeaders(address string, method string, data []byte, timeout time.Duration, headers map[string]string) ([]byte, http.Header, int, error) {
 	client := &http.Client{
 		Timeout: time.Second * timeout,
 	}
@@ -101,6 +99,9 @@ func request(address string, method string, data []byte, timeout time.Duration) 
 	}
 	req.Close = true
 	req.Header.Set("User-Agent", *UA)
+	for header, value := range headers {
+		req.Header.Set(header, value)
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		util.DebugLog(err)

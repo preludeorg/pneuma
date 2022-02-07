@@ -2,10 +2,14 @@ package sockets
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"github.com/preludeorg/pneuma/commands"
 	"math/rand"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -53,26 +57,40 @@ func refreshBeacon(agent *util.AgentConfig, beacon *util.Beacon) {
 }
 
 func requestPayload(target string) (string, error) {
-	body, filename, code, err := requestHTTPPayload(target)
+	workingDir := "./"
+	filename := path.Base(target)
+	payloadPath := filepath.Join(workingDir, filename)
+	body, code, err := requestHTTPPayload(target, payloadHash(payloadPath))
 	if err != nil {
 		return "", err
 	}
-	if code == 200 {
-		workingDir := "./"
-		path := filepath.Join(workingDir, filename)
-		err = util.SaveFile(bytes.NewReader(body), path)
-		if err != nil {
+	switch code {
+	case 204:
+		return target, nil
+	case 200:
+		if err = util.SaveFile(bytes.NewReader(body), payloadPath); err != nil {
 			return "", err
 		}
-
-		err = os.Chmod(path, 0755)
-		if err != nil {
+		if err = os.Chmod(payloadPath, 0755); err != nil {
 			return "", err
 		}
-
-		return path, nil
+		return payloadPath, nil
+	default:
+		return "", errors.New(fmt.Sprintf("UNHANDLED PAYLOAD EXCEPTION: HTTP [%d]", code))
 	}
-	return "", errors.New("UNHANDLED PAYLOAD EXCEPTION")
+}
+
+func payloadHash(filepath string) string {
+	if _, err := os.Stat(filepath); !os.IsNotExist(err) {
+		data, err := os.ReadFile(filepath)
+		if err != nil {
+			return ""
+		}
+		h := sha256.New()
+		h.Write(data)
+		return hex.EncodeToString(h.Sum(nil))
+	}
+	return ""
 }
 
 func payloadErrorResponse(err error, agent *util.AgentConfig, link *util.Instruction) {
