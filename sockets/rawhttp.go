@@ -68,12 +68,11 @@ func setHTTPProxyConfiguration(agent *util.AgentConfig) {
 }
 
 func requestHTTPPayload(address string, filehash string) ([]byte, int, error) {
-	valid, err := checkValidHTTPTarget(address)
-	if valid {
-		body, _, code, netErr := requestWithHeaders(address, "GET", []byte{}, 1800, map[string]string{"existing": filehash})
-		return body, code, netErr
+	if valid, err := checkValidHTTPTarget(address); !valid {
+		return nil, 0, err
 	}
-	return nil, 0, err
+	body, _, code, netErr := requestWithHeaders(address, "GET", []byte{}, 1800, map[string]string{"existing": filehash})
+	return body, code, netErr
 }
 
 func beaconPOST(address string, beacon util.Beacon) []byte {
