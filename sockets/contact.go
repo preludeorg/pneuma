@@ -2,8 +2,6 @@ package sockets
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/preludeorg/pneuma/commands"
@@ -84,13 +82,9 @@ func requestPayload(target string) (string, error) {
 
 func payloadHash(filepath string) string {
 	if _, err := os.Stat(filepath); !os.IsNotExist(err) {
-		data, err := os.ReadFile(filepath)
-		if err != nil {
-			return ""
+		if data, err := os.ReadFile(filepath); err == nil {
+			return util.Sha256(data)
 		}
-		h := sha256.New()
-		h.Write(data)
-		return hex.EncodeToString(h.Sum(nil))
 	}
 	return ""
 }

@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -45,6 +46,13 @@ func Decrypt(text string) string {
 	mode.CryptBlocks(cipherText, cipherText)
 	cipherText, _ = unpad(cipherText, aes.BlockSize)
 	return fmt.Sprintf("%s", cipherText)
+}
+
+//Sha256 return a sha256 string
+func Sha256(data []byte) string {
+	h := sha256.New()
+	h.Write(data)
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func pad(buf []byte, size int) ([]byte, error) {
