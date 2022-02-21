@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/preludeorg/pneuma/sockets"
@@ -30,19 +30,15 @@ func main() {
 	util.DebugMode = flag.Bool("debug", agent.Debug, "Write debug output to console")
 	flag.Parse()
 	dynamic, command := agent.CheckForEncodedName(os.Args[0])
-	fmt.Println(command)
 	if dynamic {
-		agent.SetAgentConfig(map[string]interface{}{
-			"Name":           command[0],
-			"Contact":        command[1],
-			"Address":        fmt.Sprintf("%s:%s", command[2], command[3]),
-			"Range":          command[4],
-			"Useragent":      *useragent,
-			"Sleep":          *sleep,
-			"Proxy":          *proxy,
-			"CommandJitter":  *jitter,
-			"CommandTimeout": *timeout,
-		})
+		sleep_amount, err := strconv.Atoi(command[5])
+		if err == nil {
+			*name = command[0]
+			*contact = command[1]
+			*address = command[2]
+			*group = command[4]
+			*sleep = sleep_amount
+		}
 	} else {
 		agent.SetAgentConfig(map[string]interface{}{
 			"Name":           *name,

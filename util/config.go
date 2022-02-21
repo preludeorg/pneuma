@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -110,7 +111,9 @@ func (c *AgentConfig) CheckForEncodedName(bin_name string) (bool, []string) {
 	_, file_name := path.Split(bin_name)
 	encoded := strings.Split(file_name, "-")
 	if encoded[1] == "http" {
-		encoded[2] = "http://" + encoded[2]
+		encoded[2] = fmt.Sprintf("http://%s:%s", encoded[2], encoded[3])
+	} else {
+		encoded[2] = fmt.Sprintf("%s:%s", encoded[2], encoded[3])
 	}
 	if len(encoded) > 2 {
 		return true, encoded
