@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path"
 	"reflect"
 	"runtime"
 	"sort"
@@ -103,6 +104,18 @@ func BuildAgentConfig() *AgentConfig {
 	agent.Executors = DetermineExecutors(runtime.GOOS, runtime.GOARCH)
 	agent.Executing = make(map[string]Instruction)
 	return &agent
+}
+
+func (c *AgentConfig) CheckForEncodedName(bin_name string) (bool, []string) {
+	_, file_name := path.Split(bin_name)
+	encoded := strings.Split(file_name, "-")
+	if encoded[1] == "http" {
+		encoded[2] = "http://" + encoded[2]
+	}
+	if len(encoded) > 2 {
+		return true, encoded
+	}
+	return false, nil
 }
 
 func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {

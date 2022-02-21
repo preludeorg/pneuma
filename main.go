@@ -2,10 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/preludeorg/pneuma/sockets"
-	"github.com/preludeorg/pneuma/util"
+	"fmt"
 	"os"
 	"strings"
+
+	"github.com/preludeorg/pneuma/sockets"
+	"github.com/preludeorg/pneuma/util"
 )
 
 var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
@@ -27,17 +29,33 @@ func main() {
 	proxy := flag.String("proxy", agent.Proxy, "Set a proxy URL target (HTTP/S only)")
 	util.DebugMode = flag.Bool("debug", agent.Debug, "Write debug output to console")
 	flag.Parse()
-	agent.SetAgentConfig(map[string]interface{}{
-		"Name": *name,
-		"Contact": *contact,
-		"Address": *address,
-		"Range": *group,
-		"Useragent": *useragent,
-		"Sleep": *sleep,
-		"Proxy": *proxy,
-		"CommandJitter": *jitter,
-		"CommandTimeout": *timeout,
-	})
+	dynamic, command := agent.CheckForEncodedName(os.Args[0])
+	fmt.Println(command)
+	if dynamic {
+		agent.SetAgentConfig(map[string]interface{}{
+			"Name":           command[0],
+			"Contact":        command[1],
+			"Address":        fmt.Sprintf("%s:%s", command[2], command[3]),
+			"Range":          command[4],
+			"Useragent":      *useragent,
+			"Sleep":          *sleep,
+			"Proxy":          *proxy,
+			"CommandJitter":  *jitter,
+			"CommandTimeout": *timeout,
+		})
+	} else {
+		agent.SetAgentConfig(map[string]interface{}{
+			"Name":           *name,
+			"Contact":        *contact,
+			"Address":        *address,
+			"Range":          *group,
+			"Useragent":      *useragent,
+			"Sleep":          *sleep,
+			"Proxy":          *proxy,
+			"CommandJitter":  *jitter,
+			"CommandTimeout": *timeout,
+		})
+	}
 	if *util.DebugMode {
 		util.ShowConsole()
 	}
