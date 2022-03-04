@@ -18,15 +18,15 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 	case "keyword":
 		task := splitMessage(message, '.')
 		switch task[0] {
-		case "config":
-			return updateConfiguration(task[1], agent)
-		case "shell":
-			return pty.SpawnShell(task[1], agent)
-		case "exit":
-			return shutdown(agent)
 		default:
 			return "Keyword selected not available for agent", util.ErrorExitStatus, util.ErrorExitStatus
 		}
+	case "config":
+		return updateConfiguration(message, agent)
+	case "shell":
+		return pty.SpawnShell(message, agent)
+	case "exit":
+		return shutdown(agent)
 	default:
 		util.DebugLogf("Running instruction")
 		bites, status, pid := execute(message, executor, agent)
@@ -35,7 +35,7 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 }
 
 func execute(command string, executor string, agent *util.AgentConfig) ([]byte, int, int) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout) * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout)*time.Second)
 	defer cancel()
 	bites, pid, status := execution(getShellCommand(ctx, executor, command))
 	if ctx.Err() == context.DeadlineExceeded {
@@ -44,7 +44,7 @@ func execute(command string, executor string, agent *util.AgentConfig) ([]byte, 
 	return []byte(fmt.Sprintf("%s%s", bites, "\n")), status, pid
 }
 
-func execution(command *exec.Cmd) ([]byte, int, int){
+func execution(command *exec.Cmd) ([]byte, int, int) {
 	out, err := command.Output()
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
