@@ -194,8 +194,8 @@ func (c *AgentConfig) BuildSocketBeacon(shell string) ([]byte, error) {
 	return bytes.Join([][]byte{magic, size.Bytes(), header}, []byte{}), nil
 }
 
-func ParseArguments(args string) []string {
-	var data []string
+func ParseArguments(args string) map[string]interface{} {
+	var data map[string]interface{}
 	err := json.Unmarshal([]byte(args), &data)
 	if err != nil {
 		log.Fatal(err)

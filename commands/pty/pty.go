@@ -22,7 +22,7 @@ func SpawnShell(args string, agent *util.AgentConfig) (string, int, int) {
 		executor = "/bin/sh"
 	}
 	data := util.ParseArguments(args)
-	pid, status, err := spawnPtyShell(data[0], executor, agent)
+	pid, status, err := spawnPtyShell(data["Target"].(string), executor, agent)
 	if err != nil {
 		return err.Error(), status, pid
 	}
