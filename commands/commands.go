@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/preludeorg/pneuma/commands/pty"
 	"github.com/preludeorg/pneuma/util"
@@ -56,8 +55,7 @@ func execution(command *exec.Cmd) ([]byte, int, int) {
 }
 
 func updateConfiguration(config string, agent *util.AgentConfig) (string, int, int) {
-	var newConfig map[string]interface{}
-	err := json.Unmarshal([]byte(config), &newConfig)
+	newConfig, err := util.ParseArguments(config)
 	if err == nil {
 		agent.SetAgentConfig(newConfig)
 		return "Successfully updated agent configuration.", util.SuccessExitStatus, os.Getpid()
