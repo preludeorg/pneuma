@@ -71,7 +71,7 @@ type AgentConfig struct {
 
 type Beacon struct {
 	Name      string
-	Address   string
+	Target    string
 	Hostname  string
 	Location  string
 	Platform  string
@@ -163,7 +163,7 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 	hostname, _ := os.Hostname()
 	return Beacon{
 		Name:      c.Name,
-		Address:   c.Address,
+		Target:    c.Address,
 		Hostname:  hostname,
 		Range:     c.Range,
 		Sleep:     c.Sleep,
