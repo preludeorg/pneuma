@@ -14,7 +14,6 @@ import (
 	"reflect"
 	"runtime"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -114,12 +113,8 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Sleep = ApplyKey(c.Sleep, ac, "Sleep").(int)
 	c.CommandJitter = ApplyKey(c.CommandJitter, ac, "CommandJitter").(int)
 	c.CommandTimeout = ApplyKey(c.CommandTimeout, ac, "CommandTimeout").(int)
-	if key, ok := ac["Contact"]; ok {
-		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
-			c.Contact = strings.ToLower(key.(string))
-			c.Address = ApplyKey(c.Address, ac, "Address").(string)
-		}
-	}
+	c.Contact = ApplyKey(c.Contact, ac, "Contact").(string)
+	c.Address = ApplyKey(c.Address, ac, "Address").(string)
 	if _, ok := ac["RefreshExecutors"]; ok {
 		c.Executors = DetermineExecutors(runtime.GOOS, runtime.GOARCH)
 	}
