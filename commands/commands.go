@@ -35,34 +35,36 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 func execute(command string, executor string, agent *util.AgentConfig) (util.Response, util.Process, util.Timeline) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout)*time.Second)
 	defer cancel()
-	var response util.Response
-	var process util.Process
-	var timeline util.Timeline
-	timeline.Started = time.Now().UnixMilli()
-	bites, pid, status := execution(getShellCommand(ctx, executor, command))
-	timeline.Finished = time.Now().UnixMilli()
-	process.ID = pid
-	response.Status = status
+	response, process, timeline := execution(ctx, executor, command)
 	if ctx.Err() == context.DeadlineExceeded {
-		bites = []byte("Command timed out.")
-	}
-	if status == util.SuccessExitStatus {
-		response.Output = string(bites)
-	} else {
-		response.Error = string(bites)
+		return util.BuildErrorResponse("Command timed out.")
 	}
 	return response, process, timeline
 }
 
-func execution(command *exec.Cmd) ([]byte, int, int) {
+func execution(ctx context.Context, executor, cmd string) (util.Response, util.Process, util.Timeline) {
+	var response util.Response
+	var process util.Process
+	var timeline util.Timeline
+
+	timeline.Started = time.Now().UnixMilli()
+	command := getShellCommand(ctx, executor, cmd)
 	out, err := command.Output()
+	timeline.Finished = time.Now().UnixMilli()
+	response.Output = string(out)
+	response.Status = command.ProcessState.ExitCode()
+	process.ID = command.ProcessState.Pid()
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return append(out, exitError.Stderr...), exitError.Pid(), exitError.ProcessState.ExitCode()
+			response.Error = string(exitError.Stderr)
+			response.Status = exitError.ProcessState.ExitCode()
+			process.ID = exitError.Pid()
+			return response, process, timeline
 		}
-		return append(out, []byte(err.Error())...), util.ErrorExitStatus, command.ProcessState.ExitCode()
+		response.Error = string(err.Error())
+		return response, process, timeline
 	}
-	return out, command.ProcessState.Pid(), command.ProcessState.ExitCode()
+	return response, process, timeline
 }
 
 func updateConfiguration(config string, agent *util.AgentConfig) (util.Response, util.Process, util.Timeline) {
