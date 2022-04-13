@@ -73,6 +73,9 @@ type Beacon struct {
 	Name      string
 	Target    string
 	Hostname  string
+	Username  string
+	MAC       string
+	IP        string
 	Location  string
 	Platform  string
 	Executors []string
@@ -80,17 +83,37 @@ type Beacon struct {
 	Sleep     int
 	Pwd       string
 	Executing string
+	Timestamp int64
 	Links     []Instruction
 }
 
+type Request struct {
+	Command string
+	Payload string
+}
+
+type Response struct {
+	Output string
+	Error  string
+	Status int
+}
+
+type Process struct {
+	ID int
+}
+
+type Timeline struct {
+	Started  int64
+	Finished int64
+}
+
 type Instruction struct {
-	ID       string `json:"ID"`
-	Executor string `json:"Executor"`
-	Payload  string `json:"Payload"`
-	Request  string `json:"Request"`
-	Response string
-	Status   int
-	Pid      int
+	ID       string  `json:"ID"`
+	Executor string  `json:"Executor"`
+	Request  Request `json:"Request"`
+	Response Response
+	Process  Process
+	Timeline Timeline
 }
 
 func BuildAgentConfig() *AgentConfig {
@@ -187,6 +210,26 @@ func (c *AgentConfig) BuildSocketBeacon(shell string) ([]byte, error) {
 		return nil, err
 	}
 	return bytes.Join([][]byte{magic, size.Bytes(), header}, []byte{}), nil
+}
+
+func BuildStatusResponse(message string, status int, pid int) (Response, Process, Timeline) {
+	var response Response
+	var process Process
+	var timeline Timeline
+	if status == SuccessExitStatus {
+		response.Output = message
+	} else {
+		response.Error = message
+	}
+	response.Status = status
+	process.ID = pid
+	timeline.Started = time.Now().UnixMilli()
+	timeline.Finished = time.Now().UnixMilli()
+	return response, process, timeline
+}
+
+func BuildErrorResponse(error string) (Response, Process, Timeline) {
+	return BuildStatusResponse(error, ErrorExitStatus, -1)
 }
 
 func ParseArguments(args string) (map[string]interface{}, error) {

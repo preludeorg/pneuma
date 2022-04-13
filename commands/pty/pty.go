@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func SpawnShell(args string, agent *util.AgentConfig) (string, int, int) {
+func SpawnShell(args string, agent *util.AgentConfig) (util.Response, util.Process, util.Timeline) {
 	var executor string
 	switch runtime.GOOS {
 	case "windows":
@@ -23,13 +23,13 @@ func SpawnShell(args string, agent *util.AgentConfig) (string, int, int) {
 	}
 	data, err := util.ParseArguments(args)
 	if err != nil {
-		return err.Error(), 1, agent.Pid
+		return util.BuildStatusResponse(err.Error(), 1, agent.Pid)
 	}
 	pid, status, err := spawnPtyShell(data["Target"].(string), executor, agent)
 	if err != nil {
-		return err.Error(), status, pid
+		return util.BuildStatusResponse(err.Error(), status, pid)
 	}
-	return "Successfully spawned shell.", status, pid
+	return util.BuildStatusResponse("Successfully spawned shell.", status, pid)
 }
 
 func cancelOnSocketClose(cancel context.CancelFunc, conn net.Conn) {

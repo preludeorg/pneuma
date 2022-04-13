@@ -12,13 +12,13 @@ import (
 )
 
 //RunCommand executes a given command
-func RunCommand(message string, executor string, payloadPath string, agent *util.AgentConfig) (string, int, int) {
+func RunCommand(message string, executor string, payloadPath string, agent *util.AgentConfig) (util.Response, util.Process, util.Timeline) {
 	switch executor {
 	case "keyword":
 		task := splitMessage(message, '.')
 		switch task[0] {
 		default:
-			return "Keyword selected not available for agent", util.ErrorExitStatus, util.ErrorExitStatus
+			return util.BuildErrorResponse("Keyword selected not available for agent")
 		}
 	case "config":
 		return updateConfiguration(message, agent)
@@ -28,19 +28,30 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		return shutdown(agent)
 	default:
 		util.DebugLogf("Running instruction")
-		bites, status, pid := execute(message, executor, agent)
-		return string(bites), status, pid
+		return execute(message, executor, agent)
 	}
 }
 
-func execute(command string, executor string, agent *util.AgentConfig) ([]byte, int, int) {
+func execute(command string, executor string, agent *util.AgentConfig) (util.Response, util.Process, util.Timeline) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(agent.CommandTimeout)*time.Second)
 	defer cancel()
+	var response util.Response
+	var process util.Process
+	var timeline util.Timeline
+	timeline.Started = time.Now().UnixMilli()
 	bites, pid, status := execution(getShellCommand(ctx, executor, command))
+	timeline.Finished = time.Now().UnixMilli()
+	process.ID = pid
+	response.Status = status
 	if ctx.Err() == context.DeadlineExceeded {
 		bites = []byte("Command timed out.")
 	}
-	return []byte(fmt.Sprintf("%s%s", bites, "\n")), status, pid
+	if status == util.SuccessExitStatus {
+		response.Output = string(bites)
+	} else {
+		response.Error = string(bites)
+	}
+	return response, process, timeline
 }
 
 func execution(command *exec.Cmd) ([]byte, int, int) {
@@ -54,21 +65,21 @@ func execution(command *exec.Cmd) ([]byte, int, int) {
 	return out, command.ProcessState.Pid(), command.ProcessState.ExitCode()
 }
 
-func updateConfiguration(config string, agent *util.AgentConfig) (string, int, int) {
+func updateConfiguration(config string, agent *util.AgentConfig) (util.Response, util.Process, util.Timeline) {
 	newConfig, err := util.ParseArguments(config)
 	if err == nil {
 		agent.SetAgentConfig(newConfig)
-		return "Successfully updated agent configuration.", util.SuccessExitStatus, os.Getpid()
+		return util.BuildStatusResponse("Successfully updated agent configuration.", util.SuccessExitStatus, os.Getpid())
 	}
-	return err.Error(), 1, os.Getpid()
+	return util.BuildStatusResponse(err.Error(), 1, os.Getpid())
 }
 
-func shutdown(agent *util.AgentConfig) (string, int, int) {
+func shutdown(agent *util.AgentConfig) (util.Response, util.Process, util.Timeline) {
 	go func(a *util.AgentConfig) {
 		time.Sleep(time.Duration(a.KillSleep) * time.Second)
 		os.Exit(util.SuccessExitStatus)
 	}(agent)
-	return fmt.Sprintf("Exiting agent in %d seconds", agent.KillSleep), util.SuccessExitStatus, os.Getpid()
+	return util.BuildStatusResponse(fmt.Sprintf("Exiting agent in %d seconds", agent.KillSleep), util.SuccessExitStatus, os.Getpid())
 }
 
 func splitMessage(message string, splitRune rune) []string {

