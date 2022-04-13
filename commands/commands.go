@@ -46,7 +46,6 @@ func execution(ctx context.Context, executor, cmd string) (util.Response, util.P
 	var response util.Response
 	var process util.Process
 	var timeline util.Timeline
-
 	timeline.Started = time.Now().UnixMilli()
 	command := getShellCommand(ctx, executor, cmd)
 	out, err := command.Output()
