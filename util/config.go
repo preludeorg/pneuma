@@ -73,9 +73,6 @@ type Beacon struct {
 	Name      string
 	Target    string
 	Hostname  string
-	Username  string
-	MAC       string
-	IP        string
 	Location  string
 	Platform  string
 	Executors []string
@@ -83,7 +80,6 @@ type Beacon struct {
 	Sleep     int
 	Pwd       string
 	Executing string
-	Timestamp int64
 	Links     []Instruction
 }
 
