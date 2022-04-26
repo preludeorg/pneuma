@@ -91,8 +91,6 @@ type Instruction struct {
 	Response string
 	Status   int
 	Pid      int
-	Started  int64
-	Finished int64
 }
 
 func BuildAgentConfig() *AgentConfig {
