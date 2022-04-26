@@ -30,9 +30,7 @@ func runLinks(tempB *util.Beacon, beacon *util.Beacon, agent *util.AgentConfig, 
 			payloadPath, payloadErr = requestPayload(link.Payload)
 		}
 		if payloadErr == nil {
-			link.Started = time.Now().UnixMilli()
 			response, status, pid := commands.RunCommand(link.Request, link.Executor, payloadPath, agent)
-			link.Finished = time.Now().UnixMilli()
 			link.Response = strings.TrimSpace(response) + delimiter
 			link.Status = status
 			link.Pid = pid
