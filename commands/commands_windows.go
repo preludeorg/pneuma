@@ -17,7 +17,7 @@ func getShellCommand(ctx context.Context, executor, command string) *exec.Cmd {
 	var cmd *exec.Cmd
 	switch executor {
 	case "python":
-		cmd = exec.CommandContext(ctx, "python3.exe", "-c", command)
+		cmd = exec.CommandContext(ctx, "python.exe", "-c", command)
 	case "cmd":
 		cmd = exec.CommandContext(ctx, "cmd.exe")
 		cmd.SysProcAttr = getSysProcAttrs()
