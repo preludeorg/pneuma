@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"sort"
@@ -160,6 +161,7 @@ func (c *AgentConfig) BuildExecutingHash() string {
 func (c *AgentConfig) BuildBeacon() Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
+	_ = os.Chdir(filepath.Dir(executable))
 	hostname, _ := os.Hostname()
 	return Beacon{
 		Name:      c.Name,
