@@ -101,6 +101,7 @@ func request(address string, method string, data []byte, timeout time.Duration) 
 	}
 	req.Close = true
 	req.Header.Set("User-Agent", *UA)
+	req.Header.Set("Content-Type", "text/plain")
 	resp, err := client.Do(req)
 	if err != nil {
 		util.DebugLog(err)
