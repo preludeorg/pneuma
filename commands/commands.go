@@ -3,12 +3,12 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/preludeorg/pneuma/commands/pty"
-	"github.com/preludeorg/pneuma/util"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/preludeorg/pneuma/util"
 )
 
 //RunCommand executes a given command
@@ -22,8 +22,6 @@ func RunCommand(message string, executor string, payloadPath string, agent *util
 		}
 	case "config":
 		return updateConfiguration(message, agent)
-	case "shell":
-		return pty.SpawnShell(message, agent)
 	case "exit":
 		return shutdown(agent)
 	default:

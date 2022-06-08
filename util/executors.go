@@ -45,7 +45,7 @@ func DetermineExecutors(platform string, arch string) []string {
 			}
 		}
 	}
-	executors = append([]string{"keyword", "config", "shell", "exit"}, executors...)
+	executors = append([]string{"keyword", "config", "exit"}, executors...)
 	return executors
 }
 
