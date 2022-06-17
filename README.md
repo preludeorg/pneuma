@@ -44,13 +44,13 @@ On windows you can build with:
 There is also support for garble builds (Thanks to the amazing work here: https://github.com/burrowers/garble):
 
 ```shell
-GO111MODULE=on go get mvdan.cc/garble
+go install mvdan.cc/garble@latest
 go mod tidy
 ./garble-build.sh JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA
 ```
 
 ```powershell
-GO111MODULE=on go get mvdan.cc/garble
+go install mvdan.cc/garble@latest
 go mod tidy
 .\garble-build.ps1 -randomHash "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 ```
