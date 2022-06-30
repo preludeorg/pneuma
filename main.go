@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/preludeorg/pneuma/sockets"
-	"github.com/preludeorg/pneuma/util"
 	"os"
 	"strings"
+
+	"github.com/preludeorg/pneuma/sockets"
+	"github.com/preludeorg/pneuma/util"
 )
 
 var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
@@ -26,16 +27,20 @@ func main() {
 	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting (HTTP/S only)")
 	proxy := flag.String("proxy", agent.Proxy, "Set a proxy URL target (HTTP/S only)")
 	util.DebugMode = flag.Bool("debug", agent.Debug, "Write debug output to console")
-	flag.Parse()
+	if flag.ErrHelp != nil {
+		flag.PrintDefaults()
+		util.ShowConsole()
+		os.Exit(1)
+	}
 	agent.SetAgentConfig(map[string]interface{}{
-		"Name": *name,
-		"Contact": *contact,
-		"Address": *address,
-		"Range": *group,
-		"Useragent": *useragent,
-		"Sleep": *sleep,
-		"Proxy": *proxy,
-		"CommandJitter": *jitter,
+		"Name":           *name,
+		"Contact":        *contact,
+		"Address":        *address,
+		"Range":          *group,
+		"Useragent":      *useragent,
+		"Sleep":          *sleep,
+		"Proxy":          *proxy,
+		"CommandJitter":  *jitter,
 		"CommandTimeout": *timeout,
 	})
 	if *util.DebugMode {
