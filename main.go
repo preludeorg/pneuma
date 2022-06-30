@@ -11,10 +11,6 @@ import (
 
 var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
 
-func init() {
-	util.HideConsole()
-}
-
 func main() {
 	agent := util.BuildAgentConfig()
 	name := flag.String("name", agent.Name, "Give this agent a name")
@@ -27,11 +23,6 @@ func main() {
 	useragent := flag.String("useragent", agent.Useragent, "User agent used when connecting (HTTP/S only)")
 	proxy := flag.String("proxy", agent.Proxy, "Set a proxy URL target (HTTP/S only)")
 	util.DebugMode = flag.Bool("debug", agent.Debug, "Write debug output to console")
-	if flag.ErrHelp != nil {
-		flag.PrintDefaults()
-		util.ShowConsole()
-		os.Exit(1)
-	}
 	flag.Parse()
 	agent.SetAgentConfig(map[string]interface{}{
 		"Name":           *name,
@@ -44,8 +35,8 @@ func main() {
 		"CommandJitter":  *jitter,
 		"CommandTimeout": *timeout,
 	})
-	if *util.DebugMode {
-		util.ShowConsole()
+	if !*util.DebugMode {
+		util.HideConsole()
 	}
 	if !strings.Contains(agent.Address, ":") {
 		util.DebugLogf("Your address is incorrect\n")
