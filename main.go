@@ -32,6 +32,7 @@ func main() {
 		util.ShowConsole()
 		os.Exit(1)
 	}
+	flag.Parse()
 	agent.SetAgentConfig(map[string]interface{}{
 		"Name":           *name,
 		"Contact":        *contact,
