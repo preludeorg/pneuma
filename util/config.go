@@ -102,6 +102,7 @@ func BuildAgentConfig() *AgentConfig {
 	agent.Pid = os.Getpid()
 	agent.Executors = DetermineExecutors(runtime.GOOS, runtime.GOARCH)
 	agent.Executing = make(map[string]Instruction)
+	agent.Debug = false
 	return &agent
 }
 
