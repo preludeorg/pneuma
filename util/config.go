@@ -1,10 +1,8 @@
 package util
 
 import (
-	"bytes"
 	"crypto/md5"
 	"embed"
-	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"io"
@@ -177,19 +175,6 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 		Executing: "",
 		Links:     make([]Instruction, 0),
 	}
-}
-
-func (c *AgentConfig) BuildSocketBeacon(shell string) ([]byte, error) {
-	magic := []byte(".p.s.\\")
-	header, err := json.Marshal(map[string]string{"name": c.Name, "shell": shell})
-	if err != nil {
-		return nil, err
-	}
-	size := new(bytes.Buffer)
-	if err = binary.Write(size, binary.LittleEndian, int32(len(header))); err != nil {
-		return nil, err
-	}
-	return bytes.Join([][]byte{magic, size.Bytes(), header}, []byte{}), nil
 }
 
 func ParseArguments(args string) (map[string]interface{}, error) {
