@@ -19,7 +19,7 @@ func init() {
 
 func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
 	for agent.Contact == "udp" {
-		conn, err := net.Dial("udp", agent.Address)
+		conn, err := net.Dial("udp4", agent.Address)
 		if err != nil {
 			util.DebugLogf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
 		} else {
