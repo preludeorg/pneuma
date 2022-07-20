@@ -1,20 +1,18 @@
 package util
 
 import (
-	"bytes"
 	"crypto/md5"
 	"embed"
-	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -102,6 +100,7 @@ func BuildAgentConfig() *AgentConfig {
 	agent.Pid = os.Getpid()
 	agent.Executors = DetermineExecutors(runtime.GOOS, runtime.GOARCH)
 	agent.Executing = make(map[string]Instruction)
+	agent.Debug = false
 	return &agent
 }
 
@@ -114,12 +113,8 @@ func (c *AgentConfig) SetAgentConfig(ac map[string]interface{}) {
 	c.Sleep = ApplyKey(c.Sleep, ac, "Sleep").(int)
 	c.CommandJitter = ApplyKey(c.CommandJitter, ac, "CommandJitter").(int)
 	c.CommandTimeout = ApplyKey(c.CommandTimeout, ac, "CommandTimeout").(int)
-	if key, ok := ac["Contact"]; ok {
-		if _, ok = CommunicationChannels[strings.ToLower(key.(string))]; ok {
-			c.Contact = strings.ToLower(key.(string))
-			c.Address = ApplyKey(c.Address, ac, "Address").(string)
-		}
-	}
+	c.Contact = ApplyKey(c.Contact, ac, "Contact").(string)
+	c.Address = ApplyKey(c.Address, ac, "Address").(string)
 	if _, ok := ac["RefreshExecutors"]; ok {
 		c.Executors = DetermineExecutors(runtime.GOOS, runtime.GOARCH)
 	}
@@ -165,6 +160,7 @@ func (c *AgentConfig) BuildExecutingHash() string {
 func (c *AgentConfig) BuildBeacon() Beacon {
 	pwd, _ := os.Getwd()
 	executable, _ := os.Executable()
+	_ = os.Chdir(filepath.Dir(executable))
 	hostname, _ := os.Hostname()
 	return Beacon{
 		Name:      c.Name,
@@ -181,26 +177,13 @@ func (c *AgentConfig) BuildBeacon() Beacon {
 	}
 }
 
-func (c *AgentConfig) BuildSocketBeacon(shell string) ([]byte, error) {
-	magic := []byte(".p.s.\\")
-	header, err := json.Marshal(map[string]string{"name": c.Name, "shell": shell})
-	if err != nil {
-		return nil, err
-	}
-	size := new(bytes.Buffer)
-	if err = binary.Write(size, binary.LittleEndian, int32(len(header))); err != nil {
-		return nil, err
-	}
-	return bytes.Join([][]byte{magic, size.Bytes(), header}, []byte{}), nil
-}
-
-func ParseArguments(args string) []string {
-	var data []string
+func ParseArguments(args string) (map[string]interface{}, error) {
+	var data map[string]interface{}
 	err := json.Unmarshal([]byte(args), &data)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return data
+	return data, nil
 }
 
 func DebugLogf(format string, v ...interface{}) {

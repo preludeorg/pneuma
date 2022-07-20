@@ -2,17 +2,14 @@ package main
 
 import (
 	"flag"
-	"github.com/preludeorg/pneuma/sockets"
-	"github.com/preludeorg/pneuma/util"
 	"os"
 	"strings"
+
+	"github.com/preludeorg/pneuma/sockets"
+	"github.com/preludeorg/pneuma/util"
 )
 
 var randomHash = "JWHQZM9Z4HQOYICDHW4OCJAXPPNHBA"
-
-func init() {
-	util.HideConsole()
-}
 
 func main() {
 	agent := util.BuildAgentConfig()
@@ -28,18 +25,18 @@ func main() {
 	util.DebugMode = flag.Bool("debug", agent.Debug, "Write debug output to console")
 	flag.Parse()
 	agent.SetAgentConfig(map[string]interface{}{
-		"Name": *name,
-		"Contact": *contact,
-		"Address": *address,
-		"Range": *group,
-		"Useragent": *useragent,
-		"Sleep": *sleep,
-		"Proxy": *proxy,
-		"CommandJitter": *jitter,
+		"Name":           *name,
+		"Contact":        *contact,
+		"Address":        *address,
+		"Range":          *group,
+		"Useragent":      *useragent,
+		"Sleep":          *sleep,
+		"Proxy":          *proxy,
+		"CommandJitter":  *jitter,
 		"CommandTimeout": *timeout,
 	})
-	if *util.DebugMode {
-		util.ShowConsole()
+	if !*util.DebugMode {
+		util.HideConsole()
 	}
 	if !strings.Contains(agent.Address, ":") {
 		util.DebugLogf("Your address is incorrect\n")

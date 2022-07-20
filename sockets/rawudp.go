@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"github.com/preludeorg/pneuma/util"
 	"io"
 	"net"
 	"strings"
+
+	"github.com/preludeorg/pneuma/util"
 )
 
-type UDP struct {}
+type UDP struct{}
 
 func init() {
 	util.CommunicationChannels["udp"] = UDP{}
@@ -18,10 +19,10 @@ func init() {
 
 func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (util.Beacon, error) {
 	for agent.Contact == "udp" {
-		conn, err := net.Dial("udp", agent.Address)
-	   	if err != nil {
+		conn, err := net.Dial("udp4", agent.Address)
+		if err != nil {
 			util.DebugLogf("[-] %s is either unavailable or a firewall is blocking traffic.", agent.Address)
-	   	} else {
+		} else {
 			//initial beacon
 			udpBufferedSend(conn, beacon)
 
@@ -34,13 +35,13 @@ func (contact UDP) Communicate(agent *util.AgentConfig, beacon util.Beacon) (uti
 					return beacon, nil
 				}
 			}
-	   	}
-	   	jitterSleep(agent.Sleep, "UDP")
+		}
+		jitterSleep(agent.Sleep, "UDP")
 	}
 	return beacon, nil
 }
 
-func udpRespond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig){
+func udpRespond(conn net.Conn, beacon util.Beacon, message string, agent *util.AgentConfig) {
 	var tempB util.Beacon
 	if err := json.Unmarshal([]byte(util.Decrypt(message)), &tempB); err == nil {
 		beacon.Links = beacon.Links[:0]
