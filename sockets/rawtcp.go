@@ -55,11 +55,11 @@ func bufferedSend(conn net.Conn, beacon util.Beacon) {
 	allData := bytes.NewReader(append(util.Encrypt(data), "\n"...))
 	sendBuffer := make([]byte, 1024)
 	for {
-		_, err := allData.Read(sendBuffer)
+		n, err := allData.Read(sendBuffer)
 		if err == io.EOF {
 			return
 		}
-		if _, err = conn.Write(sendBuffer); err != nil {
+		if _, err = conn.Write(sendBuffer[:n]); err != nil {
 			util.DebugLog(err)
 		}
 	}
